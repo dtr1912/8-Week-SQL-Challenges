@@ -1,2 +1,3 @@
 # 8 Week SQL Challenges
-https://8weeksqlchallenge.com/
+## Link challenges: https://8weeksqlchallenge.com/
+## 📚 Table of Contents
