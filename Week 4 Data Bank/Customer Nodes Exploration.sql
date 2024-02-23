@@ -19,16 +19,45 @@ SELECT ROUND(AVG(DATEDIFF(end_date,start_date))) avg_reallocation_days
 FROM customer_nodes 
 WHERE end_date != '9999-12-31'
 -- What is the median, 80th and 95th percentile for this same reallocation days metric for each region?
-WITH CTE AS (
-SELECT region_id,
-       start_date,
-       end_date,
-	   DATEDIFF(end_date, start_date) reallocation_day
-FROM customer_nodes c
-WHERE end_date != '9999-12-31'
-ORDER BY region_id, reallocation_day
-)
-SELECT DISTINCT(region_id),
+WITH  temp_cte AS (
+SELECT *, 
+       SUM(DATEDIFF(end_date, start_date)) day_diff, 
+	   NTILE(100) OVER(PARTITION BY region_id ORDER BY SUM(DATEDIFF(end_date, start_date))) percentile 
+FROM customer_nodes 
+WHERE end_date != '9999-12-31' 
+GROUP BY customer_id, 
+         region_id, 
+         node_id, 
+         start_date, 
+         end_date
+) 
+SELECT
+  region_name, 
+  MAX(IF(percentile = 50, day_diff, NULL)) as median, 
+  MAX(IF(percentile = 80, day_diff, NULL)) as 80_percentile, 
+  MAX(IF(percentile = 95, day_diff, NULL)) as 95_percentile
+FROM
+(
+    SELECT  
+      region_id, 
+      day_diff, 
+      percentile 
+    FROM
+      temp_cte 
+    WHERE 
+      percentile IN (50, 80, 95) 
+    GROUP BY 
+      region_id, 
+      day_diff, 
+      percentile
+) temp 
+LEFT JOIN regions ON temp.region_id = regions.region_id 
+GROUP BY region_name;
+
        
+
+
+
+
 
 

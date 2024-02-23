@@ -38,10 +38,10 @@ GROUP BY runner_id
 WITH temp AS 
 (SELECT runner_id,
 SUM(
-CASE WHEN cancellation is null THEN 1
+CASE WHEN cancellation IS NULL THEN 1
 ELSE 0
 END) AS success,
-SUM(CASE WHEN cancellation is null THEN 0 
+SUM(CASE WHEN cancellation IS NULL THEN 0 
 ELSE 1
 END) AS no_success, 
 COUNT(order_id) all_order
