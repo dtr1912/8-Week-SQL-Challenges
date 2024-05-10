@@ -33,9 +33,9 @@ GROUP BY customer_id,
 ) 
 SELECT
   region_name, 
-  MAX(IF(percentile = 50, day_diff, NULL)) as median, 
-  MAX(IF(percentile = 80, day_diff, NULL)) as 80_percentile, 
-  MAX(IF(percentile = 95, day_diff, NULL)) as 95_percentile
+  MAX(IF(percentile = 50, day_diff, NULL)) AS median, 
+  MAX(IF(percentile = 80, day_diff, NULL)) AS 80_percentile, 
+  MAX(IF(percentile = 95, day_diff, NULL)) AS 95_percentile
 FROM
 (
     SELECT  
