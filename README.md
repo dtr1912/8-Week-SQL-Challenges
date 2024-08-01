@@ -21,6 +21,8 @@ Danny wants to use the data to answer a few simple questions about his customers
 
 He plans on using these insights to help him decide whether he should expand the existing customer loyalty program - additionally he needs help to generate some basic datasets so his team can easily inspect the data without needing to use SQL.
 
+### Case Study Questions
+
 **Q1: What is the total amount each customer spent at the restaurant?**
 
 ```sql
@@ -284,7 +286,98 @@ Result:
 | A             |          1370 |
 | B             |           820 |
 
+### Bonus Questions
+**Join All The Things**
+The following questions are related creating basic data tables that Danny and his team can use to quickly derive insights without needing to join the underlying tables using SQL.
+
+```sql
+SELECT 
+      s.customer_id,
+      s.order_date,
+      m.product_name,
+      m.price,
+      CASE WHEN mb.customer_id IS NOT NULL THEN 'Y'
+           ELSE 'N'
+	  END AS member
+FROM sales s
+LEFT JOIN menu m ON s.product_id = m.product_id
+LEFT JOIN members mb ON s.customer_id = mb.customer_id AND s.order_date >= mb.join_date
+```
+Result:
+
+| customer_id   | order_date   | product_name   |   price | member   |
+|:--------------|:-------------|:---------------|--------:|:---------|
+| A             | 2021-01-01   | sushi          |      10 | N        |
+| A             | 2021-01-01   | curry          |      15 | N        |
+| A             | 2021-01-07   | curry          |      15 | Y        |
+| A             | 2021-01-10   | ramen          |      12 | Y        |
+| A             | 2021-01-11   | ramen          |      12 | Y        |
+| A             | 2021-01-11   | ramen          |      12 | Y        |
+| B             | 2021-01-01   | curry          |      15 | N        |
+| B             | 2021-01-02   | curry          |      15 | N        |
+| B             | 2021-01-04   | sushi          |      10 | N        |
+| B             | 2021-01-11   | sushi          |      10 | Y        |
+| B             | 2021-01-16   | ramen          |      12 | Y        |
+| B             | 2021-02-01   | ramen          |      12 | Y        |
+| C             | 2021-01-01   | ramen          |      12 | N        |
+| C             | 2021-01-01   | ramen          |      12 | N        |
+| C             | 2021-01-07   | ramen          |      12 | N        |
+
+**Rank All The Things**
+Danny also requires further information about the `ranking` of customer products, but he purposely does not need the ranking for non-member purchases so he expects null `ranking` values for the records when customers are not yet part of the loyalty program.
+```sql
+WITH cte1 AS(
+SELECT 
+      ROW_NUMBER() OVER (ORDER BY s.customer_id, s.order_date ASC) AS order_id,
+      s.customer_id,
+      s.order_date,
+      m.product_name,
+      m.price,
+      CASE WHEN mb.customer_id IS NOT NULL THEN 'Y'
+           ELSE 'N'
+	  END AS member
+FROM sales s
+LEFT JOIN menu m ON s.product_id = m.product_id
+LEFT JOIN members mb ON s.customer_id = mb.customer_id AND s.order_date >= mb.join_date
+),
+cte2 AS(
+SELECT *,
+	   RANK() OVER(PARTITION BY customer_id ORDER BY order_date) AS rnk
+FROM cte1
+WHERE member = 'Y'
+)
+
+SELECT c1.customer_id,
+       c1.order_date,
+       c1.product_name,
+       c1.price,
+       c1.member,
+       c2.rnk
+FROM cte1 c1
+LEFT JOIN cte2 c2 ON c1.order_id = c2.order_id
+```
+Result:
+| customer_id   | order_date   | product_name   |   price | member   |   rnk |
+|:--------------|:-------------|:---------------|--------:|:---------|------:|
+| A             | 2021-01-01   | sushi          |      10 | N        |   nan |
+| A             | 2021-01-01   | curry          |      15 | N        |   nan |
+| A             | 2021-01-07   | curry          |      15 | Y        |     1 |
+| A             | 2021-01-10   | ramen          |      12 | Y        |     2 |
+| A             | 2021-01-11   | ramen          |      12 | Y        |     3 |
+| A             | 2021-01-11   | ramen          |      12 | Y        |     3 |
+| B             | 2021-01-01   | curry          |      15 | N        |   nan |
+| B             | 2021-01-02   | curry          |      15 | N        |   nan |
+| B             | 2021-01-04   | sushi          |      10 | N        |   nan |
+| B             | 2021-01-11   | sushi          |      10 | Y        |     1 |
+| B             | 2021-01-16   | ramen          |      12 | Y        |     2 |
+| B             | 2021-02-01   | ramen          |      12 | Y        |     3 |
+| C             | 2021-01-01   | ramen          |      12 | N        |   nan |
+| C             | 2021-01-01   | ramen          |      12 | N        |   nan |
+| C             | 2021-01-07   | ramen          |      12 | N        |   nan |
+
+
 ## Case Study #2: Pizza Runner
+
 ## Case Study #3: Foodie-Fi
 ## Case Study #4: Data Bank
 ## Case Study #5: Data Mart
