@@ -58,7 +58,7 @@ SELECT customer_id,
 FROM sales
 GROUP BY customer_id;
 ```
-
+Result: 
 | customer_id   |   days_visited |
 |:--------------|---------------:|
 | A             |              4 |
@@ -591,6 +591,7 @@ SELECT COUNT(DISTINCT(order_id)) as 'Number of unique order'
 FROM customer_orders_cleaned;
 ```
 Result:
+
 |   Number of unique order |
 |-------------------------:|
 |                       10 |
@@ -603,6 +604,7 @@ WHERE cancellation IS NULL
 GROUP BY runner_id;
 ```
 Result:
+
 |   runner_id |   Number of successful orders |
 |------------:|------------------------------:|
 |           1 |                             4 |
@@ -618,6 +620,7 @@ WHERE cancellation IS NULL
 GROUP BY pizza_id
 ```
 Result:
+
 |   pizza_id |   Number of pizza was delivered |
 |-----------:|--------------------------------:|
 |          1 |                               9 |
@@ -632,6 +635,7 @@ GROUP BY customer_id, pizza_name
 ORDER BY customer_id
 ```
 Result:
+
 |   customer_id | pizza_name   |   num_pizza |
 |--------------:|:-------------|------------:|
 |           101 | Meatlovers   |           2 |
@@ -697,6 +701,7 @@ FROM customer_orders_pre c
 JOIN runner_orders_cleaned r1 ON c.order_id = r1.order_id 
 WHERE cancellation IS NULL AND exclusions IS NOT NULL AND extras IS NOT NULL
 ```
+Result: 
 |   Number of pizza had both exclusions and extras |
 |-------------------------------------------------:|
 |                                                1 |
@@ -742,34 +747,42 @@ Result:
 ### B. Runner and Customer Experience
 **Q1: How many runners signed up for each 1 week period? (i.e. week starts 2021-01-01)**
 ```sql
+
 ```
 
 Result:
+
+
 **Q2: What was the average time in minutes it took for each runner to arrive at the Pizza Runner HQ to pickup the order?**
 ```sql
 ```
 
 Result:
+
 **Q3: Is there any relationship between the number of pizzas and how long the order takes to prepare?**
 ```sql
 ```
 
 Result:
+
 **Q4: What was the average distance travelled for each customer?**
 ```sql
 ```
 
 Result:
+
 **Q5: What was the difference between the longest and shortest delivery times for all orders?**
 ```sql
 ```
 
 Result:
+
 **Q6: What was the average speed for each runner for each delivery and do you notice any trend for these values?**
 ```sql
 ```
 
 Result:
+
 **Q7: What is the successful delivery percentage for each runner?**
 ```sql
 ```
@@ -782,16 +795,19 @@ Result:
 ```
 
 Result:
+
 **What was the most commonly added extra?**
 ```sql
 ```
 
 Result:
+
 **What was the most common exclusion?**
 ```sql
 ```
 
 Result:
+
 **Generate an order item for each record in the customers_orders table in the format of one of the following:
 Meat Lovers
 Meat Lovers - Exclude Beef
@@ -801,12 +817,14 @@ Meat Lovers - Exclude Cheese, Bacon - Extra Mushroom, Peppers**
 ```
 
 Result:
+
 **Generate an alphabetically ordered comma separated ingredient list for each pizza order from the customer_orders table and add a 2x in front of any relevant ingredients
 For example: "Meat Lovers: 2xBacon, Beef, ... , Salami"**
 ```sql
 ```
 
 Result:
+
 **What is the total quantity of each ingredient used in all delivered pizzas sorted by most frequent first?**
 ```sql
 ```
