@@ -4,7 +4,7 @@ The solution for the 8 case studies from the **[#8WeekSQLChallenge](https://8wee
 Please find the solution links for the case studies below. Simply click on the links to access each solution.
 - [Case Study #1: Danny's Diner](#case-study-1-dannys-diner)
   - [Case Study Questions](#case-study-questions)
-  - [Bonus Questions](#bonus-quetions)
+  - [Bonus Questions](#bonus-questions)
 - [Case Study #2: Pizza Runner](#case-study-2-pizza-runner)
 - [Case Study #3: Foodie-Fi](#case-study-3-foodie-fi)
 - [Case Study #4: Data Bank](#case-study-4-data-bank)
