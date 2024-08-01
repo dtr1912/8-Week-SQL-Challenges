@@ -135,7 +135,7 @@ ON m.product_id = c2.product_id
 WHERE order_date < jan
 ORDER BY customer_id
 )
-SELECT customer_id, sum(point)
+SELECT customer_id, sum(point) as total_point
 FROM cte3
 GROUP BY customer_id
 ORDER BY  customer_id
