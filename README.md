@@ -2,7 +2,7 @@
 The solution for the 8 case studies from the **[#8WeekSQLChallenge](https://8weeksqlchallenge.com)**. 
 ## 📚 Table of Contents
 Please find the solution links for the case studies below. Simply click on the links to access each solution.
-- [Case Study #1: Danny's Diner](https://github.com/rogue1812/8-Week-SQL-Challenges/tree/main/Week%201%20Danny%20Diner)
+- [Case Study #1: Danny's Diner](#case-study-1-danny's-diner)
 - [Case Study #2: Pizza Runner](https://github.com/rogue1812/8-Week-SQL-Challenges/tree/main/Week%202%20Pizza%20Runner)
 - [Case Study #3: Foodie-Fi](https://github.com/rogue1812/8-Week-SQL-Challenges/tree/main/Week%203%20Foodie-fi)
 - [Case Study #4: Data Bank](https://github.com/rogue1812/8-Week-SQL-Challenges/tree/main/Week%204%20Data%20Bank)
@@ -20,9 +20,6 @@ Danny’s Diner is in need of your assistance to help the restaurant stay afloat
 Danny wants to use the data to answer a few simple questions about his customers, especially about their visiting patterns, how much money they’ve spent and also which menu items are their favourite. Having this deeper connection with his customers will help him deliver a better and more personalised experience for his loyal customers.
 
 He plans on using these insights to help him decide whether he should expand the existing customer loyalty program - additionally he needs help to generate some basic datasets so his team can easily inspect the data without needing to use SQL.
-### Entity Relationship Diagram
-
-![image](https://github.com/user-attachments/assets/4d21469a-ec36-417c-9107-44b71d0f82b1)
 
 **Q1: What is the total amount each customer spent at the restaurant?**
 
