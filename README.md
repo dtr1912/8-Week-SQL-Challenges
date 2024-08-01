@@ -6,6 +6,12 @@ Please find the solution links for the case studies below. Simply click on the l
   - [Case Study Questions](#case-study-questions)
   - [Bonus Questions](#bonus-questions)
 - [Case Study #2: Pizza Runner](#case-study-2-pizza-runner)
+  - [Data Cleaning](#data-cleaning)
+  - [A. Pizza Metrics](#a-pizza-metrics)
+  - [B. Runner and Customer Experience]
+  - [C. Ingredient Optimisation]
+  - [D. Pricing and Ratings]
+  - [E. Bonus Questions]
 - [Case Study #3: Foodie-Fi](#case-study-3-foodie-fi)
 - [Case Study #4: Data Bank](#case-study-4-data-bank)
 - [Case Study #5: Data Mart](#case-study-5-data-mart)
@@ -383,7 +389,188 @@ Result:
 
 
 ## Case Study #2: Pizza Runner
+### Introduction
+Did you know that over 115 million kilograms of pizza is consumed daily worldwide??? (Well according to Wikipedia anyway…)
+
+Danny was scrolling through his Instagram feed when something really caught his eye - “80s Retro Styling and Pizza Is The Future!”
+
+Danny was sold on the idea, but he knew that pizza alone was not going to help him get seed funding to expand his new Pizza Empire - so he had one more genius idea to combine with it - he was going to Uberize it - and so Pizza Runner was launched!
+
+Danny started by recruiting “runners” to deliver fresh pizza from Pizza Runner Headquarters (otherwise known as Danny’s house) and also maxed out his credit card to pay freelance developers to build a mobile app to accept orders from customers.
+
 ### Data Cleaning
+```sql
+-- Check table customer_orders
+-- SELECT * FROM customer_orders
+-- DESCRIBE customer_orders
+-- Replace blank strings and Null (as text) with NULL and seperate string into rows
+DROP TABLE IF EXISTS customer_orders_pre;
+CREATE TEMPORARY TABLE customer_orders_pre AS (
+  SELECT 
+  	order_id,
+  	customer_id,
+  	pizza_id, 
+  	CASE 
+  		WHEN exclusions = '' THEN NULL
+  		WHEN exclusions = 'null' THEN NULL
+  		ELSE exclusions
+  	END AS exclusions, 
+  	CASE 
+  		WHEN extras = '' THEN NULL
+  		WHEN extras = 'null' THEN NULL
+  		ELSE extras
+  	END AS extras,
+  	order_time
+  FROM customer_orders);
+SELECT * FROM customer_orders_pre
+
+DROP TABLE IF EXISTS customer_orders_cleaned;
+CREATE TEMPORARY TABLE customer_orders_cleaned AS (
+SELECT t.order_id,
+       t.customer_id,
+       t.pizza_id,
+	   trim(j1.exclusions) as exclusions,
+       trim(j2.extras) as extras,
+       t.order_time
+FROM customer_orders_pre t
+INNER JOIN JSON_TABLE(trim(replace(json_array(t.exclusions),',','","')), '$[*]' columns (exclusions varchar(5) path '$')) j1
+INNER JOIN JSON_TABLE(trim(replace(json_array(t.extras),',','","')),'$[*]' columns (extras varchar(5) path '$')) j2
+);
+SELECT * FROM customer_orders_cleaned
+-- Check table runner_orders 
+-- SELECT * FROM runnner_orders
+-- DESCRIBE runner_orders 
+-- replace blank or null as text with NULL type and remove the text from the stringed numerical values.
+DROP TABLE IF EXISTS runner_orders_pre;
+CREATE TEMPORARY TABLE runner_orders_pre AS(
+SELECT
+	order_id,
+	runner_id,
+	CASE
+		WHEN pickup_time = 'null' or pickup_time='' THEN NULL
+		ELSE pickup_time
+	END AS pickup_time,
+	CASE
+		WHEN distance = 'null' or distance='' THEN NULL
+		ELSE regexp_replace(distance, '[a-z]+', '')
+	END AS distance_km,
+	CASE
+		WHEN duration = 'null' or duration='' THEN NULL
+		ELSE regexp_replace(duration, '[a-z]+', '')
+		END AS duration_mins,
+	CASE
+		WHEN cancellation = '' or cancellation = 'null'  THEN NULL
+		ELSE cancellation
+		END AS cancellation               
+FROM runner_orders);
+SELECT * FROM runner_orders_pre;
+-- Changing data type 
+-- Using CAST function
+DROP TABLE IF EXISTS runner_orders_cleaned;
+CREATE TEMPORARY TABLE runner_orders_cleaned AS (
+	SELECT
+		order_id,
+		runner_id,
+		CAST(pickup_time AS datetime) AS pickup_time,
+		CAST(distance_km AS DECIMAL(3,1)) AS distance_km, 
+		CAST(duration_mins AS SIGNED INT) AS duration_mins,
+		cancellation
+    FROM runner_orders_pre);
+SELECT * FROM runner_orders_cleaned
+-- Check table pizza_recipes
+-- SELECT * FROM pizza_recipes
+-- DESCRIBE pizza_recipes
+-- Expanding the comma seperated string into rows
+DROP TABLE IF EXISTS pizza_recipes_cleaned; 
+CREATE TEMPORARY TABLE pizza_recipes_cleaned(
+SELECT p.pizza_id,
+trim(j3.topping) as topping
+FROM pizza_recipes p 
+JOIN JSON_TABLE(TRIM(REPLACE(JSON_ARRAY(p.toppings),',','","')),'$[*]' columns (topping varchar(50) path '$')) j3
+);
+SELECT * FROM pizza_recipes_cleaned
+-- Check table runners
+-- SELECT * FROM runners
+-- DESCRIBE runner
+-- Check table pizza_names 
+-- SELECT * FROM pizza_names 
+-- DESCRIBE pizza_names
+-- Check table pizza_toppings
+-- SELECT * FROM pizza_toppings
+-- DESCIRBE pizza_toppings
+SELECT * FROM pizza_recipes
+```
+
+#customer_order_cleaned
+
+|   order_id |   customer_id |   pizza_id |   exclusions |   extras | order_time          |
+|-----------:|--------------:|-----------:|-------------:|---------:|:--------------------|
+|          1 |           101 |          1 |          nan |      nan | 2020-01-01 18:05:02 |
+|          2 |           101 |          1 |          nan |      nan | 2020-01-01 19:00:52 |
+|          3 |           102 |          1 |          nan |      nan | 2020-01-02 23:51:23 |
+|          3 |           102 |          2 |          nan |      nan | 2020-01-02 23:51:23 |
+|          4 |           103 |          1 |            4 |      nan | 2020-01-04 13:23:46 |
+|          4 |           103 |          1 |            4 |      nan | 2020-01-04 13:23:46 |
+|          4 |           103 |          2 |            4 |      nan | 2020-01-04 13:23:46 |
+|          5 |           104 |          1 |          nan |        1 | 2020-01-08 21:00:29 |
+|          6 |           101 |          2 |          nan |      nan | 2020-01-08 21:03:13 |
+|          7 |           105 |          2 |          nan |        1 | 2020-01-08 21:20:29 |
+|          8 |           102 |          1 |          nan |      nan | 2020-01-09 23:54:33 |
+|          9 |           103 |          1 |            4 |        1 | 2020-01-10 11:22:59 |
+|          9 |           103 |          1 |            4 |        5 | 2020-01-10 11:22:59 |
+|         10 |           104 |          1 |          nan |      nan | 2020-01-11 18:34:49 |
+|         10 |           104 |          1 |            2 |        1 | 2020-01-11 18:34:49 |
+|         10 |           104 |          1 |            2 |        4 | 2020-01-11 18:34:49 |
+|         10 |           104 |          1 |            6 |        1 | 2020-01-11 18:34:49 |
+|         10 |           104 |          1 |            6 |        4 | 2020-01-11 18:34:49 |
+
+
+#pizza_recipes_cleaned
+
+|   pizza_id |   topping |
+|-----------:|----------:|
+|          1 |         1 |
+|          1 |         2 |
+|          1 |         3 |
+|          1 |         4 |
+|          1 |         5 |
+|          1 |         6 |
+|          1 |         8 |
+|          1 |        10 |
+|          2 |         4 |
+|          2 |         6 |
+|          2 |         7 |
+|          2 |         9 |
+|          2 |        11 |
+|          2 |        12 |
+|          3 |         1 |
+|          3 |         2 |
+|          3 |         3 |
+|          3 |         4 |
+|          3 |         5 |
+|          3 |         6 |
+|          3 |         7 |
+|          3 |         8 |
+|          3 |         9 |
+|          3 |        10 |
+|          3 |        11 |
+|          3 |        12 |
+
+
+#runner_orders_cleand
+
+|   order_id |   runner_id | pickup_time         |   distance_km |   duration_mins | cancellation            |
+|-----------:|------------:|:--------------------|--------------:|----------------:|:------------------------|
+|          1 |           1 | 2020-01-01 18:15:34 |          20   |              32 | nan                     |
+|          2 |           1 | 2020-01-01 19:10:54 |          20   |              27 | nan                     |
+|          3 |           1 | 2020-01-03 00:12:37 |          13.4 |              20 | nan                     |
+|          4 |           2 | 2020-01-04 13:53:03 |          23.4 |              40 | nan                     |
+|          5 |           3 | 2020-01-08 21:10:57 |          10   |              15 | nan                     |
+|          6 |           3 | nan                 |         nan   |             nan | Restaurant Cancellation |
+|          7 |           2 | 2020-01-08 21:30:45 |          25   |              25 | nan                     |
+|          8 |           2 | 2020-01-10 00:15:02 |          23.4 |              15 | nan                     |
+|          9 |           2 | nan                 |         nan   |             nan | Customer Cancellation   |
+|         10 |           1 | 2020-01-11 18:50:20 |          10   |              10 | nan                     |
 
 ### A. Pizza Metrics
 
