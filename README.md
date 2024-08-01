@@ -2,14 +2,14 @@
 The solution for the 8 case studies from the **[#8WeekSQLChallenge](https://8weeksqlchallenge.com)**. 
 ## 📚 Table of Contents
 Please find the solution links for the case studies below. Simply click on the links to access each solution.
-- [Case Study #1: Danny's Diner](#case-study-1-danny's-diner)
-- [Case Study #2: Pizza Runner](https://github.com/rogue1812/8-Week-SQL-Challenges/tree/main/Week%202%20Pizza%20Runner)
-- [Case Study #3: Foodie-Fi](https://github.com/rogue1812/8-Week-SQL-Challenges/tree/main/Week%203%20Foodie-fi)
-- [Case Study #4: Data Bank](https://github.com/rogue1812/8-Week-SQL-Challenges/tree/main/Week%204%20Data%20Bank)
-- [Case Study #5: Data Mart](https://github.com/rogue1812/8-Week-SQL-Challenges/tree/main/Week%205%20Data%20Mart)
-- [Case Study #6: Clique Bait](https://github.com/rogue1812/8-Week-SQL-Challenges/tree/main/Week%206%20Clique%20Bait)
-- [Case Study #7: Balanced Tree](https://github.com/rogue1812/8-Week-SQL-Challenges/tree/main/Week%207%20Balanced%20Tree%20Clothing%20Co)
-- [Case Study #8: Fresh Segments](https://github.com/rogue1812/8-Week-SQL-Challenges/tree/main/Week%208%20Fresh%20Segments)
+- [Case Study #1: Danny's Diner](#case-study-1---dannys-diner)
+- [Case Study #2: Pizza Runner](#case-study-1---pizza-runner)
+- [Case Study #3: Foodie-Fi](#case-study-1---foodie-fi)
+- [Case Study #4: Data Bank](#case-study-1---data-bank)
+- [Case Study #5: Data Mart](#case-study-1---data-mart)
+- [Case Study #6: Clique Bait](#case-study-1---clique-bait)
+- [Case Study #7: Balanced Tree](#case-study-1---balanced-tree)
+- [Case Study #8: Fresh Segments](#case-study-1---fresh-segments)
 ## Case Study #1 - Danny's Diner
 ### Introduction
 Danny seriously loves Japanese food so in the beginning of 2021, he decides to embark upon a risky venture and opens up a cute little restaurant that sells his 3 favourite foods: sushi, curry and ramen.
@@ -283,3 +283,11 @@ Result:
 |:--------------|--------------:|
 | A             |          1370 |
 | B             |           820 |
+
+## Case Study #2: Pizza Runner
+## Case Study #3: Foodie-Fi
+## Case Study #4: Data Bank
+## Case Study #5: Data Mart
+## Case Study #6: Clique Bait
+## Case Study #7: Balanced Tree
+## Case Study #8: Fresh Segments
