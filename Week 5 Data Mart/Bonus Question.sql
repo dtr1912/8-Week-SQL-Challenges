@@ -69,7 +69,7 @@ SELECT customer_type,
 FROM clean_weekly_sales
 GROUP BY customer_type
 )
-SELECT customer_types,
+SELECT customer_type,
        before_sales,
        after_sales,
        after_sales - before_sales as actual_growth, 

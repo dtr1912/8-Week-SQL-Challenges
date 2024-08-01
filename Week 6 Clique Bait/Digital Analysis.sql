@@ -25,11 +25,14 @@ FROM events e
 JOIN event_identifier i ON e.event_type = i.event_type
 GROUP BY event_name
 -- What is the percentage of visits which have a purchase event?
+
 SELECT 100*COUNT(DISTINCT visit_id) / (SELECT COUNT(DISTINCT visit_id) FROM events) AS pct_of_purchase
 FROM events e
 JOIN event_identifier i ON e.event_type = i.event_type
 WHERE event_name = 'Purchase'
+
 -- What is the percentage of visits which view the checkout page but do not have a purchase event?
+
 WITH view_checkout AS (
   SELECT COUNT(e.visit_id) AS cnt
   FROM events e

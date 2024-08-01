@@ -1,5 +1,5 @@
 -- What day of the week is used for each week_date value?
-SELECT DISTINCT(dayname(week_date)) as week_day 
+SELECT DISTINCT(dayname(week_date)) AS week_day 
 FROM clean_weekly_sales 
 -- What range of week numbers are missing from the dataset?
 WITH RECURSIVE all_week AS 
