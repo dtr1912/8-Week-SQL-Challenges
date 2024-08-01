@@ -290,6 +290,7 @@ Result:
 
 ### Bonus Questions
 **Join All The Things**
+
 The following questions are related creating basic data tables that Danny and his team can use to quickly derive insights without needing to join the underlying tables using SQL.
 
 ```sql
@@ -326,7 +327,9 @@ Result:
 | C             | 2021-01-07   | ramen          |      12 | N        |
 
 **Rank All The Things**
+
 Danny also requires further information about the `ranking` of customer products, but he purposely does not need the ranking for non-member purchases so he expects null `ranking` values for the records when customers are not yet part of the loyalty program.
+
 ```sql
 WITH cte1 AS(
 SELECT 
@@ -356,8 +359,9 @@ SELECT c1.customer_id,
        c1.member,
        c2.rnk
 FROM cte1 c1
-LEFT JOIN cte2 c2 ON c1.order_id = c2.order_id
+LEFT JOIN cte2 c2 ON c1.order_id = c2.order_id;
 ```
+
 Result:
 | customer_id   | order_date   | product_name   |   price | member   |   rnk |
 |:--------------|:-------------|:---------------|--------:|:---------|------:|
