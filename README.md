@@ -1790,6 +1790,11 @@ SELECT COUNT(DISTINCT node_id) 'Number of node'
 FROM  customer_nodes
 ```
 Result:
+
+|   Number of node |
+|-----------------:|
+|                5 |
+
 **Q2. What is the number of nodes per region?**
 ```sql
 SELECT region_name, 
@@ -1798,7 +1803,16 @@ FROM customer_nodes n
 JOIN regions r ON n.region_id=r.region_id
 GROUP BY n.region_id
 ```
-Result:
+Result:'
+
+| region_name   |   Number of nodes per region |
+|:--------------|-----------------------------:|
+| Australia     |                          770 |
+| America       |                          735 |
+| Africa        |                          714 |
+| Asia          |                          665 |
+| Europe        |                          616 |
+
 **Q3. How many customers are allocated to each region?**
 ```sql
 SELECT region_name, 
@@ -1809,6 +1823,14 @@ GROUP BY n.region_id
 ```
 Result:
 
+| region_name   |   Number of customers each region |
+|:--------------|----------------------------------:|
+| Australia     |                               110 |
+| America       |                               105 |
+| Africa        |                               102 |
+| Asia          |                                95 |
+| Europe        |                                88 |
+
 **Q4. How many days on average are customers reallocated to a different node?**
 ```sql
 SELECT ROUND(AVG(DATEDIFF(end_date,start_date))) avg_reallocation_days
@@ -1817,6 +1839,10 @@ WHERE end_date != '9999-12-31'
 ```
 Result:
 On average, customers are reallocated to a different node every 15 days.
+
+|   avg_reallocation_days |
+|------------------------:|
+|                      15 |
 
 **Q5. What is the median, 80th and 95th percentile for this same reallocation days metric for each region?**
 ```sql
@@ -1856,6 +1882,14 @@ LEFT JOIN regions ON temp.region_id = regions.region_id
 GROUP BY region_name;
 ```
 Result:
+
+| region_name   |   median |   80_percentile |   95_percentile |
+|:--------------|---------:|----------------:|----------------:|
+| Australia     |       16 |              24 |              28 |
+| America       |       16 |              23 |              28 |
+| Africa        |       15 |              24 |              28 |
+| Asia          |       15 |              24 |              28 |
+| Europe        |       16 |              24 |              28 |
 
 ### B. Customer Transactions
 **Q1. What is the unique count and total amount for each transaction type?**
