@@ -1911,14 +1911,23 @@ What can we do about future introduction of similar sustainability updates to th
 
 ### B. Data Exploration
 **Q1. What day of the week is used for each week_date value?**
+
 **Q2. What range of week numbers are missing from the dataset?**
+
 **Q3. How many total transactions were there for each year in the dataset?**
+
 **Q4. What is the total sales for each region for each month?**
+
 **Q5. What is the total count of transactions for each platform**
+
 **Q6. What is the percentage of sales for Retail vs Shopify for each month?**
+
 **Q7. What is the percentage of sales by demographic for each year in the dataset?**
+
 **Q8. Which age_band and demographic values contribute the most to Retail sales?**
+
 **Q9. Can we use the avg_transaction column to find the average transaction size for each year for Retail vs Shopify? If not - how would you calculate it instead?**
+
 ### C. Before & After Analysis
 This technique is usually used when we inspect an important event and want to inspect the impact before and after a certain point in time.
 
@@ -1929,7 +1938,9 @@ We would include all week_date values for 2020-06-15 as the start of the period 
 Using this analysis approach - answer the following questions:
 
 **Q1. What is the total sales for the 4 weeks before and after 2020-06-15? What is the growth or reduction rate in actual values and percentage of sales?**
+
 **Q2. What about the entire 12 weeks before and after?**
+
 **Q3. How do the sale metrics for these 2 periods before and after compare with the previous years in 2018 and 2019?**
 ### D. Bonus Question
 Which areas of the business have the highest negative impact in sales metrics performance in 2020 for the 12 week before and after period?
@@ -1951,15 +1962,24 @@ In this case study - you are required to support Danny’s vision and analyse hi
 ### B. Digital Analysis
 Using the available datasets - answer the following questions using a single query for each one:
 
-Q1. How many users are there?
-Q2. How many cookies does each user have on average?
-Q3. What is the unique number of visits by all users per month?
-Q4. What is the number of events for each event type?
-Q5. What is the percentage of visits which have a purchase event?
-Q6. What is the percentage of visits which view the checkout page but do not have a purchase event?
-Q7. What are the top 3 pages by number of views?
-Q8. What is the number of views and cart adds for each product category?
-Q9. What are the top 3 products by purchases?
+**Q1. How many users are there?**
+
+**Q2. How many cookies does each user have on average?**
+
+**Q3. What is the unique number of visits by all users per month?**
+
+**Q4. What is the number of events for each event type?**
+
+**Q5. What is the percentage of visits which have a purchase event?**
+
+**Q6. What is the percentage of visits which view the checkout page but do not have a purchase event?**
+
+**Q7. What are the top 3 pages by number of views?**
+
+**Q8. What is the number of views and cart adds for each product category?**
+
+**Q9. What are the top 3 products by purchases?**
+
 
 ### C. Product Funnel Analysis
 Using a single SQL query - create a new output table which has the following details:
@@ -1973,10 +1993,15 @@ Additionally, create another table which further aggregates the data for the abo
 Use your 2 new output tables - answer the following questions:
 
 **Q1. Which product had the most views, cart adds and purchases?**
+
 **Q2. Which product was most likely to be abandoned?**
+
 **Q3. Which product had the highest view to purchase percentage?**
+
 **Q4. What is the average conversion rate from view to cart add?**
+
 **Q5. What is the average conversion rate from cart add to purchase?**
+
 ### D. Campaigns Analysis
 Generate a table that has 1 single row for every unique visit_id record and has the following columns:
 
@@ -2008,28 +2033,46 @@ Danny, the CEO of this trendy fashion company has asked you to assist the team�
 ### A. High Level Sales Analysis
 
 **Q1. What was the total quantity sold for all products?**
+
 **Q2. What is the total generated revenue for all products before discounts?**
+
 **Q3. What was the total discount amount for all products?**
+
 ### B. Transactional Analysis
 
 **Q1. How many unique transactions were there?**
+
 **Q2. What is the average unique products purchased in each transaction?**
+
 **Q3. What are the 25th, 50th and 75th percentile values for the revenue per transaction?**
+
 **Q4. What is the average discount value per transaction?**
+
 **Q5. What is the percentage split of all transactions for members vs non-members?**
+
 **Q6. What is the average revenue for member transactions and non-member transactions?**
 
 ### C. Product Analysis
 **Q1. What are the top 3 products by total revenue before discount?**
+
 **Q2. What is the total quantity, revenue and discount for each segment?**
+
 **Q3. What is the top selling product for each segment?**
+
 **Q4. What is the total quantity, revenue and discount for each category?**
+
 **Q5. What is the top selling product for each category?**
+
 **Q6. What is the percentage split of revenue by product for each segment?**
+
 **Q7. What is the percentage split of revenue by segment for each category?**
+
 **Q8. What is the percentage split of total revenue by category?**
+
 **Q9. What is the total transaction “penetration” for each product? (hint: penetration = number of transactions where at least 1 quantity of a product was purchased divided by total number of transactions)**
+
 **Q10. What is the most common combination of at least 1 quantity of any 3 products in a 1 single transaction?**
+
 ### D. Reporting Challenge 
 Write a single SQL script that combines all of the previous questions into a scheduled report that the Balanced Tree team can run at the beginning of each month to calculate the previous month’s values.
 
@@ -2056,25 +2099,42 @@ Danny has asked for your assistance to analyse aggregated metrics for an example
 
 ### A. Data Exploration and Cleansing
 **Q1. Update the fresh_segments.interest_metrics table by modifying the month_year column to be a date data type with the start of the month**
+
 **Q2. What is count of records in the fresh_segments.interest_metrics for each month_year value sorted in chronological order (earliest to latest) with the null values appearing first?**
+
 **Q3. What do you think we should do with these null values in the fresh_segments.interest_metrics**
+
 **Q4. How many interest_id values exist in the fresh_segments.interest_metrics table but not in the fresh_segments.interest_map table? What about the other way around?**
+
 **Q5. Summarise the id values in the fresh_segments.interest_map by its total record count in this table**
-**Q6. What sort of table join should we perform for our analysis and why? Check your logic by checking the rows where interest_id = 21246 in your joined output and include all columns from fresh_segments.interest_metrics and all columns from fresh_segments.interest_map except from the id column.**
+
+**Q6. What sort of table join should we perform for our analysis and why? Check your logic by checking the rows where interest_id = 21246 in your joined output and include all columns from 
+fresh_segments.interest_metrics and all columns from fresh_segments.interest_map except from the id column.**
+
 **Q7. Are there any records in your joined table where the month_year value is before the created_at value from the fresh_segments.interest_map table? Do you think these values are valid and why?**
+
 
 ### B. Interest Anlysis
 **Q1. Which interests have been present in all month_year dates in our dataset?**
+
 **Q2. Using this same total_months measure - calculate the cumulative percentage of all records starting at 14 months - which total_months value passes the 90% cumulative percentage value?**
+
 **Q3. If we were to remove all interest_id values which are lower than the total_months value we found in the previous question - how many total data points would we be removing?**
+
 **Q4. Does this decision make sense to remove these data points from a business perspective? Use an example where there are all 14 months present to a removed interest example for your arguments - think about what it means to have less months present from a segment perspective.**
+
 **Q5. After removing these interests - how many unique interests are there for each month?**
+
 
 ### C. Segment Analysis
 **Q1. Using our filtered dataset by removing the interests with less than 6 months worth of data, which are the top 10 and bottom 10 interests which have the largest composition values in any month_year? Only use the maximum composition value for each interest but you must keep the corresponding month_year**
+
 **Q2. Which 5 interests had the lowest average ranking value?**
+
 **Q3. Which 5 interests had the largest standard deviation in their percentile_ranking value?**
+
 **Q4. For the 5 interests found in the previous question - what was minimum and maximum percentile_ranking values for each interest and its corresponding year_month value? Can you describe what is happening for these 5 interests?**
+
 **Q5. How would you describe our customers in this segment based off their composition and ranking values? What sort of products or services should we show to these customers and what should we avoid?**
 
 ### D. Index Analysis
@@ -2083,7 +2143,11 @@ The index_value is a measure which can be used to reverse calculate the average 
 Average composition can be calculated by dividing the composition column by the index_value column rounded to 2 decimal places.
 
 **Q1. What is the top 10 interests by the average composition for each month?**
+
 **Q2. For all of these top 10 interests - which interest appears the most often?**
+
 **Q3. What is the average of the average composition for the top 10 interests for each month?**
+
 **Q4. What is the 3 month rolling average of the max average composition value from September 2018 to August 2019 and include the previous top ranking interests in the same output shown below.**
+
 **Q5. Provide a possible reason why the max average composition might change from month to month? Could it signal something is not quite right with the overall business model for Fresh Segments?**
