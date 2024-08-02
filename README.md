@@ -745,6 +745,7 @@ Result:
 | Saturday   |               5 |
 
 ### B. Runner and Customer Experience
+
 **Q1: How many runners signed up for each 1 week period? (i.e. week starts 2021-01-01)**
 ```sql
 
@@ -752,6 +753,11 @@ Result:
 
 Result:
 
+|   number_of_week | start_day   |   number_of_runner |
+|-----------------:|:------------|-------------------:|
+|                1 | 2021-01-01  |                  2 |
+|                2 | 2021-01-08  |                  1 |
+|                3 | 2021-01-15  |                  1 |
 
 **Q2: What was the average time in minutes it took for each runner to arrive at the Pizza Runner HQ to pickup the order?**
 ```sql
@@ -759,11 +765,30 @@ Result:
 
 Result:
 
+|   runner_id |   avg_time |
+|------------:|-----------:|
+|           1 |         15 |
+|           2 |         23 |
+|           3 |         10 |
+
 **Q3: Is there any relationship between the number of pizzas and how long the order takes to prepare?**
 ```sql
 ```
 
 Result:
+
+|   order_id |   num_pizza |   avg_time |
+|-----------:|------------:|-----------:|
+|          1 |           1 |         10 |
+|          2 |           1 |         10 |
+|          3 |           2 |         21 |
+|          4 |           3 |         29 |
+|          5 |           1 |         10 |
+|          7 |           1 |         10 |
+|          8 |           1 |         20 |
+|         10 |           2 |         15 |
+
+
 
 **Q4: What was the average distance travelled for each customer?**
 ```sql
@@ -771,11 +796,24 @@ Result:
 
 Result:
 
+|   customer_id |   avg_distance |
+|--------------:|---------------:|
+|           101 |             20 |
+|           102 |             17 |
+|           103 |             23 |
+|           104 |             10 |
+|           105 |             25 |
+
 **Q5: What was the difference between the longest and shortest delivery times for all orders?**
 ```sql
 ```
 
 Result:
+
+|   longest_delivery_time |   shortest_delivery_time |   time_diff |
+|------------------------:|-------------------------:|------------:|
+|                      40 |                       10 |          30 |
+
 
 **Q6: What was the average speed for each runner for each delivery and do you notice any trend for these values?**
 ```sql
@@ -783,11 +821,23 @@ Result:
 
 Result:
 
+|   runner_id | speed    |
+|------------:|:---------|
+|           1 | 46(km/h) |
+|           2 | 63(km/h) |
+|           3 | 40(km/h) |
+
 **Q7: What is the successful delivery percentage for each runner?**
 ```sql
 ```
 
 Result:
+
+|   runner_id | Percentage of successfull delivery   |
+|------------:|:-------------------------------------|
+|           1 | 100%                                 |
+|           2 | 75%                                  |
+|           3 | 50%                                  |
 
 ### C. Ingredient Optimisation
 **What are the standard ingredients for each pizza?**
