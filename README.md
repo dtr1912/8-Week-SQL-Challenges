@@ -2679,28 +2679,216 @@ Clique Bait is not like your regular online seafood store - the founder and CEO 
 
 In this case study - you are required to support Danny’s vision and analyse his dataset and come up with creative solutions to calculate funnel fallout rates for the Clique Bait online store.
 ### A. Enterprise Relationship Diagram
+```sql
+CREATE SCHEMA `clique_bait`;
 
+CREATE TABLE `clique_bait`.`event_identifier` (
+  `event_type` INTEGER,
+  `event_name` VARCHAR(13)
+);
+
+CREATE TABLE `clique_bait`.`campaign_identifier` (
+  `campaign_id` INTEGER,
+  `products` VARCHAR(3),
+  `campaign_name` VARCHAR(33),
+  `start_date` TIMESTAMP,
+  `end_date` TIMESTAMP
+);
+
+CREATE TABLE `clique_bait`.`page_hierarchy` (
+  `page_id` integer,
+  `page_name` VARCHAR(14),
+  `product_category` VARCHAR(9),
+  `product_id` INTEGER
+);
+
+CREATE TABLE `clique_bait`.`users` (
+  `user_id` INTEGER,
+  `cookie_id` VARCHAR(6),
+  `start_date` TIMESTAMP
+);
+
+CREATE TABLE `clique_bait`.`events` (
+  `visit_id` VARCHAR(6),
+  `cookie_id` VARCHAR(6),
+  `page_id` INTEGER,
+  `event_type` INTEGER,
+  `sequence_number` INTEGER,
+  `event_time` TIMESTAMP
+);
+
+ALTER TABLE `clique_bait`.`events` ADD FOREIGN KEY (`event_type`) REFERENCES `clique_bait`.`event_identifier` (`event_type`);
+
+ALTER TABLE `clique_bait`.`users` ADD FOREIGN KEY (`cookie_id`) REFERENCES `clique_bait`.`events` (`cookie_id`);
+
+ALTER TABLE `clique_bait`.`events` ADD FOREIGN KEY (`page_id`) REFERENCES `clique_bait`.`page_hierarchy` (`page_id`);
+```
 ### B. Digital Analysis
+
 Using the available datasets - answer the following questions using a single query for each one:
 
 **Q1. How many users are there?**
+```sql
+SELECT COUNT(DISTINCT user_id) num_users
+FROM users
+```
+
+|   num_users |
+|------------:|
+|         500 |
 
 **Q2. How many cookies does each user have on average?**
+```sql
+WITH count_cookie AS(
+SELECT user_id, 
+       COUNT(cookie_id) num_cookies
+FROM users
+GROUP BY user_id
+)
+SELECT AVG(num_cookies) AS avg_cookie
+FROM count_cookie
+```
+|   num_users |
+|------------:|
+|         500 |
 
 **Q3. What is the unique number of visits by all users per month?**
+```sql
+SELECT
+  MONTHNAME(event_time) AS months, 
+  COUNT(DISTINCT visit_id) AS num_of_visits 
+FROM events 
+GROUP BY months, 
+         MONTH(event_time) 
+ORDER BY MONTH(event_time);
+```
+
+| months   |   num_of_visits |
+|:---------|----------------:|
+| January  |             876 |
+| February |            1488 |
+| March    |             916 |
+| April    |             248 |
+| May      |              36 |
 
 **Q4. What is the number of events for each event type?**
+```sql
+SELECT event_name,
+       COUNT(*) num_of_events
+FROM events e
+JOIN event_identifier i ON e.event_type = i.event_type
+GROUP BY event_name
+```
+
+| event_name    |   num_of_events |
+|:--------------|----------------:|
+| Page View     |           20928 |
+| Add to Cart   |            8451 |
+| Purchase      |            1777 |
+| Ad Impression |             876 |
+| Ad Click      |             702 |
 
 **Q5. What is the percentage of visits which have a purchase event?**
 
+```sql
+SELECT 100*COUNT(DISTINCT visit_id) / (SELECT COUNT(DISTINCT visit_id) FROM events) AS pct_of_purchase
+FROM events e
+JOIN event_identifier i ON e.event_type = i.event_type
+WHERE event_name = 'Purchase'
+```
+
+|   pct_of_purchase |
+|------------------:|
+|           49.8597 |
+
 **Q6. What is the percentage of visits which view the checkout page but do not have a purchase event?**
+
+```sql
+WITH view_checkout AS (
+  SELECT COUNT(e.visit_id) AS cnt
+  FROM events e
+  JOIN event_identifier ei ON e.event_type = ei.event_type
+  JOIN page_hierarchy p ON e.page_id = p.page_id
+  WHERE ei.event_name = 'Page View'
+    AND p.page_name = 'Checkout'
+)
+SELECT CAST(100-(100.0 * COUNT(DISTINCT e.visit_id) 
+		/ (SELECT cnt FROM view_checkout)) AS decimal(10, 2)) AS pct_view_checkout_not_purchase
+FROM events e
+JOIN event_identifier ei ON e.event_type = ei.event_type
+WHERE ei.event_name = 'Purchase'
+```
+
+|   pct_view_checkout_not_purchase |
+|---------------------------------:|
+|                             15.5 |
 
 **Q7. What are the top 3 pages by number of views?**
 
+```sql
+SELECT 
+  ph.page_name,
+  COUNT(*) AS page_views
+FROM events e
+JOIN event_identifier ei ON e.event_type = ei.event_type 
+JOIN page_hierarchy ph ON e.page_id = ph.page_id
+WHERE ei.event_name = 'Page View'
+GROUP BY ph.page_name
+ORDER BY page_views DESC LIMIT 3
+```
+
+| page_name    |   page_views |
+|:-------------|-------------:|
+| All Products |         3174 |
+| Checkout     |         2103 |
+| Home Page    |         1782 |
+
+
 **Q8. What is the number of views and cart adds for each product category?**
+
+```sql
+SELECT 
+  product_category,
+  SUM(CASE WHEN event_name = 'Page View' THEN 1 ELSE 0 END) page_views,
+  SUM(CASE WHEN event_name = 'Add to Cart' THEN 1 ELSE 0 END) add_cart
+FROM events e
+JOIN event_identifier ei ON e.event_type = ei.event_type 
+JOIN page_hierarchy ph ON e.page_id = ph.page_id
+WHERE product_category IS NOT NULL
+GROUP BY product_category
+```
+
+| product_category   |   page_views |   add_cart |
+|:-------------------|-------------:|-----------:|
+| Luxury             |         3032 |       1870 |
+| Shellfish          |         6204 |       3792 |
+| Fish               |         4633 |       2789 |
 
 **Q9. What are the top 3 products by purchases?**
 
+```sql
+SELECT product_id,
+	   page_name,
+       COUNT(*) AS num_purchase
+FROM events e
+JOIN event_identifier ei ON e.event_type = ei.event_type 
+JOIN page_hierarchy ph ON e.page_id = ph.page_id
+WHERE event_name = 'Add to Cart' AND 
+visit_id IN 
+(SELECT visit_id 
+FROM events e
+JOIN event_identifier ei ON e.event_type = ei.event_type 
+WHERE event_name = 'Purchase')
+GROUP BY  product_id,
+	      page_name
+ORDER BY COUNT(*) DESC LIMIT 3
+```
+
+|   product_id | page_name   |   num_purchase |
+|-------------:|:------------|---------------:|
+|            7 | Lobster     |            754 |
+|            9 | Oyster      |            726 |
+|            8 | Crab        |            719 |
 
 ### C. Product Funnel Analysis
 Using a single SQL query - create a new output table which has the following details:
@@ -2709,19 +2897,249 @@ Using a single SQL query - create a new output table which has the following det
 - How many times was each product added to cart?
 - How many times was each product added to a cart but not purchased (abandoned)?
 - How many times was each product purchased?
+
+Create product table:
+```sql
+  DROP TABLE IF EXISTS product; 
+CREATE TABLE product AS(
+WITH product AS(
+SELECT 
+product_id,
+page_name,
+product_category,
+SUM(CASE WHEN event_name = 'Page View' THEN 1 ELSE 0 END) product_viewed ,
+SUM(CASE WHEN event_name = 'Add to Cart' THEN 1 ELSE 0 END) added_cart
+FROM events e
+JOIN event_identifier ei ON e.event_type = ei.event_type 
+JOIN page_hierarchy ph ON e.page_id = ph.page_id
+WHERE product_id IS NOT NULL
+GROUP BY product_id,
+page_name,
+product_category
+),
+abandoned AS (
+SELECT 
+product_id,
+page_name,
+product_category,
+COUNT(*) abandoned_product
+FROM events e
+JOIN event_identifier ei ON e.event_type = ei.event_type 
+JOIN page_hierarchy ph ON e.page_id = ph.page_id
+WHERE event_name = 'Add to Cart' AND 
+visit_id NOT IN 
+(SELECT visit_id 
+FROM events e
+JOIN event_identifier ei ON e.event_type = ei.event_type 
+WHERE event_name = 'Purchase')
+GROUP BY  product_id,
+	      page_name,
+          product_category
+),
+purchased AS (
+SELECT 
+product_id,
+page_name,
+product_category,
+COUNT(*) purchased_product
+FROM events e
+JOIN event_identifier ei ON e.event_type = ei.event_type 
+JOIN page_hierarchy ph ON e.page_id = ph.page_id
+WHERE event_name = 'Add to Cart' AND 
+visit_id IN 
+(SELECT visit_id 
+FROM events e
+JOIN event_identifier ei ON e.event_type = ei.event_type 
+WHERE event_name = 'Purchase')
+GROUP BY  product_id,
+	      page_name,
+          product_category)
+SELECT p.product_id,
+       p.page_name,
+       p.product_category,
+       product_viewed,
+       added_cart,
+       abandoned_product,
+       purchased_product
+FROM product p
+LEFT JOIN abandoned a ON p.product_id = a.product_id
+LEFT JOIN purchased pc ON p.product_id = pc.product_id
+ORDER BY product_id
+)
+
+SELECT * FROM product
+```
+#product
+
+|   product_id | page_name      | product_category   |   product_viewed |   added_cart |   abandoned_product |   purchased_product |
+|-------------:|:---------------|:-------------------|-----------------:|-------------:|--------------------:|--------------------:|
+|            1 | Salmon         | Fish               |             1559 |          938 |                 227 |                 711 |
+|            2 | Kingfish       | Fish               |             1559 |          920 |                 213 |                 707 |
+|            3 | Tuna           | Fish               |             1515 |          931 |                 234 |                 697 |
+|            4 | Russian Caviar | Luxury             |             1563 |          946 |                 249 |                 697 |
+|            5 | Black Truffle  | Luxury             |             1469 |          924 |                 217 |                 707 |
+|            6 | Abalone        | Shellfish          |             1525 |          932 |                 233 |                 699 |
+|            7 | Lobster        | Shellfish          |             1547 |          968 |                 214 |                 754 |
+|            8 | Crab           | Shellfish          |             1564 |          949 |                 230 |                 719 |
+|            9 | Oyster         | Shellfish          |             1568 |          943 |                 217 |                 726 |
+
 Additionally, create another table which further aggregates the data for the above points but this time for each product category instead of individual products.
+
+Create product_category table:
+```sql
+DROP TABLE IF EXISTS product_category; 
+CREATE TABLE product_category AS(
+WITH product AS(
+SELECT 
+product_category,
+SUM(CASE WHEN event_name = 'Page View' THEN 1 ELSE 0 END) product_viewed ,
+SUM(CASE WHEN event_name = 'Add to Cart' THEN 1 ELSE 0 END) added_cart
+FROM events e
+JOIN event_identifier ei ON e.event_type = ei.event_type 
+JOIN page_hierarchy ph ON e.page_id = ph.page_id
+WHERE product_category IS NOT NULL
+GROUP BY 
+product_category
+),
+abandoned AS (
+SELECT 
+product_category,
+COUNT(*) abandoned_product
+FROM events e
+JOIN event_identifier ei ON e.event_type = ei.event_type 
+JOIN page_hierarchy ph ON e.page_id = ph.page_id
+WHERE event_name = 'Add to Cart' AND 
+visit_id NOT IN 
+(SELECT visit_id 
+FROM events e
+JOIN event_identifier ei ON e.event_type = ei.event_type 
+WHERE event_name = 'Purchase')
+GROUP BY product_category
+),
+purchased AS (
+SELECT 
+product_category,
+COUNT(*) purchased_product
+FROM events e
+JOIN event_identifier ei ON e.event_type = ei.event_type 
+JOIN page_hierarchy ph ON e.page_id = ph.page_id
+WHERE event_name = 'Add to Cart' AND 
+visit_id IN 
+(SELECT visit_id 
+FROM events e
+JOIN event_identifier ei ON e.event_type = ei.event_type 
+WHERE event_name = 'Purchase')
+GROUP BY product_category)
+SELECT p.product_category,
+       product_viewed,
+       added_cart,
+       abandoned_product,
+       purchased_product
+FROM product p
+LEFT JOIN abandoned a ON p.product_category = a.product_category
+LEFT JOIN purchased pc ON p.product_category = pc.product_category
+ORDER BY product_category
+)
+
+SELECT * FROM product_category
+```
+#product_category
+
+| product_category   |   product_viewed |   added_cart |   abandoned_product |   purchased_product |
+|:-------------------|-----------------:|-------------:|--------------------:|--------------------:|
+| Fish               |             4633 |         2789 |                 674 |                2115 |
+| Luxury             |             3032 |         1870 |                 466 |                1404 |
+| Shellfish          |             6204 |         3792 |                 894 |                2898 |
 
 Use your 2 new output tables - answer the following questions:
 
 **Q1. Which product had the most views, cart adds and purchases?**
+```sql
+-- the most views
+SELECT product_id,
+       page_name,
+       product_category,
+       product_viewed
+FROM product
+ORDER BY product_viewed DESC LIMIT 1
+-- the most cart adds 
+SELECT product_id,
+       page_name,
+       product_category,
+       added_cart
+FROM product
+ORDER BY added_cart DESC LIMIT 1
+```
+
+|   product_id | page_name   | product_category   |   product_viewed |
+|-------------:|:------------|:-------------------|-----------------:|
+|            9 | Oyster      | Shellfish          |             1568 |
+
+
+|   product_id | page_name   | product_category   |   added_cart |
+|-------------:|:------------|:-------------------|-------------:|
+|            7 | Lobster     | Shellfish          |          968 |
+
+
+|   product_id | page_name   | product_category   |   purchased_product |
+|-------------:|:------------|:-------------------|--------------------:|
+|            7 | Lobster     | Shellfish          |                 754 |
+
 
 **Q2. Which product was most likely to be abandoned?**
+```sql
+SELECT product_id,
+       page_name,
+       product_category,
+       abandoned_product
+FROM product
+ORDER BY abandoned_product DESC LIMIT 1
+```
+
+|   product_id | page_name      | product_category   |   abandoned_product |
+|-------------:|:---------------|:-------------------|--------------------:|
+|            4 | Russian Caviar | Luxury             |                 249 |
 
 **Q3. Which product had the highest view to purchase percentage?**
 
+```sql
+SELECT product_id,
+       page_name,
+       product_category,
+       100*purchased_product/product_viewed AS pct_view_to_purchase
+FROM product
+ORDER BY 100*purchased_product/product_viewed DESC LIMIT 1
+```
+
+|   product_id | page_name   | product_category   |   pct_view_to_purchase |
+|-------------:|:------------|:-------------------|-----------------------:|
+|            7 | Lobster     | Shellfish          |                48.7395 |
+
 **Q4. What is the average conversion rate from view to cart add?**
+```sql
+SELECT product_id,
+       page_name,
+       product_category,
+       100*purchased_product/product_viewed AS pct_view_to_purchase
+FROM product
+ORDER BY 100*purchased_product/product_viewed DESC LIMIT 1
+```
+
+|   avg_view_to_cart |
+|-------------------:|
+|            60.9512 |
 
 **Q5. What is the average conversion rate from cart add to purchase?**
+
+```sql
+SELECT 
+       AVG(100*purchased_product/added_cart) AS avg_cart_to_purchase
+FROM product
+``
+
+|   avg_cart_to_purchase |
+|-----------------------:|
+|                 75.928 |
 
 ### D. Campaigns Analysis
 Generate a table that has 1 single row for every unique visit_id record and has the following columns:
@@ -2736,14 +3154,58 @@ Generate a table that has 1 single row for every unique visit_id record and has 
 - impression: count of ad impressions for each visit
 - click: count of ad clicks for each visit
 - **(Optional column)** cart_products: a comma separated text value with products added to the cart sorted by the order they were added to the cart (hint: use the sequence_number)
-Use the subsequent dataset to generate at least 5 insights for the Clique Bait team - bonus: prepare a single A4 infographic that the team can use for their management reporting sessions, be sure to emphasise the most important points from your findings.
 
+Create campaign_summary table: 
+
+```sql
+DROP TABLE IF EXISTS campaign_summary;
+CREATE TABLE campaign_summary AS(
+SELECT 
+      u.user_id,
+      e.visit_id,
+      MIN(event_time) AS visit_start_time,
+      SUM(CASE WHEN ei.event_name = 'Page View' THEN 1 ELSE 0 END) AS page_views,
+      SUM(CASE WHEN ei.event_name = 'Add to Cart' THEN 1 ELSE 0 END) AS cart_adds,
+      SUM(CASE WHEN ei.event_name = 'Purchase' THEN 1 ELSE 0 END) AS purchase,
+      CASE WHEN c.campaign_name IS NOT NULL THEN c.campaign_name
+           ELSE 'No Campaign'
+	  END AS campaign_name,
+	  SUM(CASE WHEN ei.event_name = 'Ad Impression' THEN 1 ELSE 0 END) AS impression,
+	  SUM(CASE WHEN ei.event_name = 'Ad Click' THEN 1 ELSE 0 END) AS click
+FROM events e
+LEFT JOIN users u 
+    ON e.cookie_id = u.cookie_id
+JOIN event_identifier ei 
+    ON e.event_type = ei.event_type
+JOIN page_hierarchy ph 
+    ON e.page_id = ph.page_id
+LEFT JOIN campaign_identifier c 
+    ON  c.start_date <= e.event_time AND e.event_time <= c.end_date
+GROUP BY u.user_id, e.visit_id, c.campaign_name)
+```
+#campaign_summary 
+|   user_id | visit_id   | visit_start_time    |   page_views |   cart_adds |   purchase | campaign_name                     |   impression |   click |
+|----------:|:-----------|:--------------------|-------------:|------------:|-----------:|:----------------------------------|-------------:|--------:|
+|       439 | 73d7e8     | 2020-03-08 07:12:11 |            5 |           2 |          1 | Half Off - Treat Your Shellf(ish) |            0 |       0 |
+|        41 | 6c312a     | 2020-02-05 15:40:41 |            8 |           2 |          1 | Half Off - Treat Your Shellf(ish) |            0 |       0 |
+|        99 | 484cf5     | 2020-03-06 20:50:12 |            8 |           2 |          1 | Half Off - Treat Your Shellf(ish) |            0 |       0 |
+|       476 | 280969     | 2020-01-21 20:03:34 |            7 |           1 |          1 | 25% Off - Living The Lux Life     |            0 |       0 |
+|       360 | 3a588b     | 2020-02-27 04:00:09 |            5 |           2 |          0 | Half Off - Treat Your Shellf(ish) |            0 |       0 |
+|       194 | 373a4b     | 2020-02-21 09:54:32 |            1 |           0 |          0 | Half Off - Treat Your Shellf(ish) |            0 |       0 |
+|       342 | a38b2f     | 2020-02-20 02:59:58 |            6 |           3 |          0 | Half Off - Treat Your Shellf(ish) |            0 |       0 |
+|       118 | 6fa366     | 2020-01-19 16:19:26 |            7 |           3 |          0 | 25% Off - Living The Lux Life     |            0 |       0 |
+|       469 | 064835     | 2020-02-25 09:48:46 |            7 |           1 |          0 | Half Off - Treat Your Shellf(ish) |            0 |       0 |
+|       290 | 252236     | 2020-02-12 02:38:57 |            6 |           2 |          1 | Half Off - Treat Your Shellf(ish) |            0 |       0 |
+
+Use the subsequent dataset to generate at least 5 insights for the Clique Bait team.
 Some ideas you might want to investigate further include:
-
 - Identifying users who have received impressions during each campaign period and comparing each metric with other users who did not have an impression event
 - Does clicking on an impression lead to higher purchase rates?
 - What is the uplift in purchase rate when comparing users who click on a campaign impression versus users who do not receive an impression? What if we compare them with users who just an impression but do not click
 - What metrics can you use to quantify the success or failure of each campaign compared to eachother?
+
+Solution: 
+
 
 ## Case Study #7: Balanced Tree
 ### Introduction
