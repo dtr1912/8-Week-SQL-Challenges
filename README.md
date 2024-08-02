@@ -43,7 +43,7 @@ Please find the solution links for the case studies below. Simply click on the l
   - [A. Data Exploration and Cleansing](#a-data-exploration-and-cleansing)
   - [B. Interest Analysis](#b-interest-analysis)
   - [C. Segment analysis](#c-segment-analysis)
-  - [D. Index Analysis](#a-index-analysis)
+  - [D. Index Analysis](#d-index-analysis)
 
 ## Case Study #1: Danny's Diner
 ### Introduction
