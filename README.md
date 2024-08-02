@@ -2900,7 +2900,7 @@ Using a single SQL query - create a new output table which has the following det
 
 Create product table:
 ```sql
-  DROP TABLE IF EXISTS product; 
+DROP TABLE IF EXISTS product; 
 CREATE TABLE product AS(
 WITH product AS(
 SELECT 
@@ -3135,7 +3135,7 @@ ORDER BY 100*purchased_product/product_viewed DESC LIMIT 1
 SELECT 
        AVG(100*purchased_product/added_cart) AS avg_cart_to_purchase
 FROM product
-``
+```
 
 |   avg_cart_to_purchase |
 |-----------------------:|
@@ -3198,15 +3198,99 @@ GROUP BY u.user_id, e.visit_id, c.campaign_name)
 |       290 | 252236     | 2020-02-12 02:38:57 |            6 |           2 |          1 | Half Off - Treat Your Shellf(ish) |            0 |       0 |
 
 Use the subsequent dataset to generate at least 5 insights for the Clique Bait team.
-Some ideas you might want to investigate further include:
-- Identifying users who have received impressions during each campaign period and comparing each metric with other users who did not have an impression event
-- Does clicking on an impression lead to higher purchase rates?
-- What is the uplift in purchase rate when comparing users who click on a campaign impression versus users who do not receive an impression? What if we compare them with users who just an impression but do not click
-- What metrics can you use to quantify the success or failure of each campaign compared to eachother?
 
-Solution: 
+Solution:
 
+**Identifying users who have received impressions during each campaign period and comparing each metric with other users who did not have an impression event**
 
+```sql
+-- Number of users who received impressions during campaign periods 
+SELECT COUNT(DISTINCT user_id) AS received_impressions
+FROM campaign_summary
+WHERE impression > 0
+AND campaign_name != 'No Campaign';
+```
+|   received_impressions |
+|-----------------------:|
+|                    417 |
+
+```sql
+-- Number of users who  didn't  received impressions during campaign periods 
+SELECT COUNT(DISTINCT user_id) AS no_received_impressions
+FROM campaign_summary
+WHERE user_id NOT IN (
+  SELECT user_id
+  FROM campaign_summary
+  WHERE impression > 0)
+AND campaign_name != 'No Campaign'
+```
+|   no_received_impressions |
+|--------------------------:|
+|                        56 |
+
+```sql
+-- Number of users who received impressions but didn't click on the ad during campaign periods
+SELECT COUNT(DISTINCT user_id) AS received_impressions_not_click
+FROM campaign_summary
+WHERE impression > 0 AND click = 0 
+AND campaign_name != 'No Campaign';
+```
+|   received_impressions_not_click |
+|---------------------------------:|
+|                              127 |
+
+Now we know:
+- The number of users who received impressions during campaign periods is 417.
+- The number of users who received impressions but didn't click on the ad is 127.
+- The number of users who didn't receive impressions during campaign periods is 56.
+- Using those numbers, we can calculate:
+- Overall, impression rate = 100 * 417 / (417+56) = 88.2 %
+- Overall, click rate = 100-(100 * 127 / 417) = 69.5 %
+
+**What is the uplift in purchase rate when comparing users who click on a campaign impression versus users who do not receive an impression? What if we compare them with users who just an impression but do not click. Does clicking on an impression lead to higher purchase rates?**
+
+```sql
+-- For clicked ad group
+SELECT SUM(purchase)/COUNT(DISTINCT user_id) AS purchase_rate_impression
+FROM campaign_summary
+WHERE click > 0
+AND campaign_name != 'No Campaign'
+```
+|   purchase_rate_impression |
+|---------------------------:|
+|                     1.4632 |
+
+```sql
+-- For didn't received impression group 
+SELECT SUM(purchase)/COUNT(DISTINCT user_id) AS purchase_rate_no_impression
+FROM campaign_summary
+WHERE campaign_name != 'No Campaign' AND
+user_id NOT IN (
+SELECT user_id 
+FROM campaign_summary 
+WHERE impression > 0 )
+```
+|   purchase_rate_no_impression |
+|------------------------------:|
+|                        1.2321 |
+
+```sql
+-- For received impression but not clicked
+SELECT SUM(purchase)/COUNT(DISTINCT user_id) AS purchase_rate_impressions_not_click
+FROM campaign_summary
+WHERE impression > 0 AND click = 0 
+AND campaign_name != 'No Campaign';
+```
+|   purchase_rate_impressions_not_click |
+|--------------------------------------:|
+|                                0.7717 |
+Now we know:
+- The purchase rate of customers who clicked in campaign is 1.4632
+- The purchase rate of customers who didn't received impressions is 1.2321
+- The purchase rate of customers who received impressions but didn't click on the ad is 0.7717
+
+What metrics can you use to quantify the success or failure of each campaign compared to eachother?
+- 
 ## Case Study #7: Balanced Tree
 ### Introduction
 Balanced Tree Clothing Company prides themselves on providing an optimised range of clothing and lifestyle wear for the modern adventurer!
