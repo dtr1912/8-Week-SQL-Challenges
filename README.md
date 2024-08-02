@@ -3289,8 +3289,9 @@ Now we know:
 - The purchase rate of customers who didn't received impressions is 1.2321
 - The purchase rate of customers who received impressions but didn't click on the ad is 0.7717
 
-What metrics can you use to quantify the success or failure of each campaign compared to eachother?
+**What metrics can you use to quantify the success or failure of each campaign compared to eachother?**
 - 
+
 ## Case Study #7: Balanced Tree
 ### Introduction
 Balanced Tree Clothing Company prides themselves on providing an optimised range of clothing and lifestyle wear for the modern adventurer!
@@ -3300,48 +3301,385 @@ Danny, the CEO of this trendy fashion company has asked you to assist the team�
 ### A. High Level Sales Analysis
 
 **Q1. What was the total quantity sold for all products?**
-
-
+```sql
+SELECT SUM(qty) AS total_quantity
+FROM sales
+```
+|   total_quantity |
+|-----------------:|
+|            45216 |
 **Q2. What is the total generated revenue for all products before discounts?**
-
+```sql
+SELECT SUM(qty*price) AS revenue
+FROM sales
+```
+|     revenue |
+|------------:|
+| 1.28945e+06 |
 
 **Q3. What was the total discount amount for all products?**
+```sql
+SELECT SUM(qty*price*discount/100) AS revenue
+FROM sales
+```
 
+|   revenue |
+|----------:|
+|    156229 |
 
 ### B. Transactional Analysis
 
 **Q1. How many unique transactions were there?**
+```sql
+SELECT COUNT(DISTINCT txn_id) AS num_txn
+FROM sales
+```
+
+|   num_txn |
+|----------:|
+|      2500 |
+
 
 **Q2. What is the average unique products purchased in each transaction?**
+```sql
+WITH unique_prod AS (
+SELECT txn_id,
+       COUNT(prod_id) AS num_prod
+FROM sales
+GROUP BY txn_id
+)
+SELECT AVG(num_prod) AS avg_prod_each_txn
+FROM unique_prod
+```
+
+|   avg_prod_each_txn |
+|--------------------:|
+|               6.038 |
+
 
 **Q3. What are the 25th, 50th and 75th percentile values for the revenue per transaction?**
+```sql
+WITH revenue_per_txn AS 
+(
+SELECT txn_id,
+       CAST(SUM(qty*price) AS FLOAT) AS revenue_txn
+FROM sales
+GROUP BY txn_id
+ORDER BY revenue_txn ASC
+)
+, pct AS (
+SELECT txn_id,
+       revenue_txn,
+       NTILE(100) OVER (ORDER BY revenue_txn) pct
+FROM revenue_per_txn 
+)
+SELECT 
+       MAX(IF(pct = 25, revenue_txn, NULL)) AS q1,
+       MAX(IF(pct = 50, revenue_txn, NULL)) AS q2,
+       MAX(IF(pct = 75, revenue_txn, NULL)) AS q3
+FROM pct
+```
+
+|   q1 |   q2 |   q3 |
+|-----:|-----:|-----:|
+|  375 |  509 |  647 |
+
 
 **Q4. What is the average discount value per transaction?**
+```sql
+WITH temp AS(
+SELECT txn_id,
+	   CAST(SUM(qty*price*discount/100) AS FLOAT) AS total_discount
+FROM sales 
+GROUP BY txn_id
+)
+SELECT CAST(AVG(total_discount) AS FLOAT) AS avg_discount
+FROM temp 
+```
+
+|   avg_discount |
+|---------------:|
+|        62.4917 |
 
 **Q5. What is the percentage split of all transactions for members vs non-members?**
+```sql
+SELECT 
+  CAST(100.0*COUNT(DISTINCT CASE WHEN member = 't' THEN txn_id END) / COUNT(DISTINCT txn_id) AS FLOAT) AS members_pct,
+  CAST(100.0*COUNT(DISTINCT CASE WHEN member = 'f' THEN txn_id END) / COUNT(DISTINCT txn_id) AS FLOAT) AS non_members_pct
+FROM sales;
+```
+
+|   members_pct |   non_members_pct |
+|--------------:|------------------:|
+|          60.2 |              39.8 |
 
 **Q6. What is the average revenue for member transactions and non-member transactions?**
+```sql
+SELECT
+  CASE WHEN member = 'f' THEN 'member'
+  ELSE 'non_member'
+  END AS member, 
+  ROUND( SUM(qty * price) / COUNT(distinct txn_id), 2) as avg_revenue 
+FROM sales 
+GROUP BY member
+```
+| member     |   avg_revenue |
+|:-----------|--------------:|
+| member     |        515.04 |
+| non_member |        516.27 |
 
 ### C. Product Analysis
 **Q1. What are the top 3 products by total revenue before discount?**
+```sql
+SELECT 
+       product_name,
+	   SUM(qty*s.price) AS total_revenue
+FROM sales s
+LEFT JOIN product_details p ON s.prod_id = p.product_id
+GROUP BY product_name
+ORDER BY total_revenue DESC LIMIT 3
+```
+| product_name                 |   total_revenue |
+|:-----------------------------|----------------:|
+| Blue Polo Shirt - Mens       |          217683 |
+| Grey Fashion Jacket - Womens |          209304 |
+| White Tee Shirt - Mens       |          152000 |
 
 **Q2. What is the total quantity, revenue and discount for each segment?**
+```sql
+SELECT segment_id, 
+       segment_name,
+       SUM(qty) AS total_qty,
+       SUM(qty*s.price) AS revenue,
+       SUM(discount) AS total_discount
+FROM sales s
+LEFT JOIN product_details p ON s.prod_id = p.product_id
+GROUP BY segment_id
+```
+|   segment_id | segment_name   |   total_qty |   revenue |   total_discount |
+|-------------:|:---------------|------------:|----------:|-----------------:|
+|            3 | Jeans          |       11349 |    208350 |            45740 |
+|            5 | Shirt          |       11265 |    406143 |            46043 |
+|            6 | Socks          |       11217 |    307977 |            45465 |
+|            4 | Jacket         |       11385 |    366983 |            45452 |
+
 
 **Q3. What is the top selling product for each segment?**
+```sql
+WITH temp AS(
+SELECT segment_id,
+       segment_name, 
+       product_name,
+       SUM(qty) as num_qty,
+       RANK() OVER(PARTITION BY segment_id ORDER BY SUM(qty) DESC) rank_qty
+FROM sales s
+LEFT JOIN product_details p ON s.prod_id = p.product_id
+GROUP BY segment_id, prod_id
+ORDER BY segment_id
+)
+SELECT segment_id,
+       segment_name, 
+       product_name,
+       num_qty AS top_qty
+FROM temp 
+WHERE rank_qty =1 
+```
+
+|   segment_id | segment_name   | product_name                  |   top_qty |
+|-------------:|:---------------|:------------------------------|----------:|
+|            3 | Jeans          | Navy Oversized Jeans - Womens |      3856 |
+|            4 | Jacket         | Grey Fashion Jacket - Womens  |      3876 |
+|            5 | Shirt          | Blue Polo Shirt - Mens        |      3819 |
+|            6 | Socks          | Navy Solid Socks - Mens       |      3792 |
 
 **Q4. What is the total quantity, revenue and discount for each category?**
+```sql
+SELECT category_id,
+       category_name,
+       SUM(qty) AS total_qty,
+       SUM(s.price*qty) AS revenue,
+       SUM(qty*s.price*discount/100) AS discount
+FROM sales s
+LEFT JOIN product_details p ON s.prod_id = p.product_id
+GROUP BY category_id
+```
+|   category_id | category_name   |   total_qty |   revenue |   discount |
+|--------------:|:----------------|------------:|----------:|-----------:|
+|             1 | Womens          |       22734 |    575333 |    69621.4 |
+|             2 | Mens            |       22482 |    714120 |    86607.7 |
 
 **Q5. What is the top selling product for each category?**
+```sql
+WITH temp AS(
+SELECT category_id,
+       category_name, 
+       product_name,
+       SUM(qty) as num_qty,
+       RANK() OVER(PARTITION BY category_id ORDER BY SUM(qty) DESC) rank_qty
+FROM sales s
+LEFT JOIN product_details p ON s.prod_id = p.product_id
+GROUP BY category_id, prod_id
+ORDER BY category_id
+)
+SELECT category_id,
+       category_name, 
+       product_name,
+       num_qty AS top_qty
+FROM temp 
+WHERE rank_qty =1 
+```
+|   category_id | category_name   | product_name                 |   top_qty |
+|--------------:|:----------------|:-----------------------------|----------:|
+|             1 | Womens          | Grey Fashion Jacket - Womens |      3876 |
+|             2 | Mens            | Blue Polo Shirt - Mens       |      3819 |
 
 **Q6. What is the percentage split of revenue by product for each segment?**
+```sql
+WITH temp AS (
+SELECT segment_id,
+       segment_name, 
+       product_id,
+       product_name,
+       s.price,
+       qty,
+       SUM(s.price*qty) OVER(PARTITION BY product_id)/SUM(s.price*qty) OVER(PARTITION BY segment_id) AS pct
+FROM sales s
+LEFT JOIN product_details p ON s.prod_id = p.product_id
+ORDER BY segment_id 
+)
+SELECT  segment_name,
+        product_name,
+        CAST(pct*100 AS DECIMAL(10,2)) AS pct
+FROM temp 
+GROUP BY product_id
+```
+| segment_name   | product_name                     |   pct |
+|:---------------|:---------------------------------|------:|
+| Jeans          | Black Straight Jeans - Womens    | 58.15 |
+| Jeans          | Cream Relaxed Jeans - Womens     | 17.79 |
+| Jeans          | Navy Oversized Jeans - Womens    | 24.06 |
+| Jacket         | Khaki Suit Jacket - Womens       | 23.51 |
+| Jacket         | Indigo Rain Jacket - Womens      | 19.45 |
+| Jacket         | Grey Fashion Jacket - Womens     | 57.03 |
+| Shirt          | White Tee Shirt - Mens           | 37.43 |
+| Shirt          | Blue Polo Shirt - Mens           | 53.6  |
+| Shirt          | Teal Button Up Shirt - Mens      |  8.98 |
+| Socks          | Navy Solid Socks - Mens          | 44.33 |
+| Socks          | Pink Fluro Polkadot Socks - Mens | 35.5  |
+| Socks          | White Striped Socks - Mens       | 20.18 |
 
 **Q7. What is the percentage split of revenue by segment for each category?**
+```sql
+WITH temp AS (
+SELECT category_id,
+       category_name, 
+       segment_id,
+       segment_name,
+       s.price,
+       qty,
+       SUM(s.price*qty) OVER(PARTITION BY segment_id)/SUM(s.price*qty) OVER(PARTITION BY category_id) AS pct
+FROM sales s
+LEFT JOIN product_details p ON s.prod_id = p.product_id
+ORDER BY category_id
+)
+SELECT  category_name,
+        segment_name,
+        CAST(pct*100 AS DECIMAL(10,2)) AS pct
+FROM temp 
+GROUP BY segment_id
+```
+| category_name   | segment_name   |   pct |
+|:----------------|:---------------|------:|
+| Womens          | Jacket         | 63.79 |
+| Womens          | Jeans          | 36.21 |
+| Mens            | Socks          | 43.13 |
+| Mens            | Shirt          | 56.87 |
 
 **Q8. What is the percentage split of total revenue by category?**
+```sql
+WITH temp AS
+(SELECT category_name,
+	   SUM(s.price*qty) revenue
+FROM sales s
+LEFT JOIN product_details p ON s.prod_id = p.product_id
+GROUP BY category_id
+)
+SELECT *,
+       CAST(100*revenue/SUM(revenue) OVER() AS DECIMAL(10,2)) AS pct
+FROM temp
+```
+| category_name   |   revenue |   pct |
+|:----------------|----------:|------:|
+| Womens          |    575333 | 44.62 |
+| Mens            |    714120 | 55.38 |
 
 **Q9. What is the total transaction “penetration” for each product? (hint: penetration = number of transactions where at least 1 quantity of a product was purchased divided by total number of transactions)**
+```sql
+WITH temp AS
+(SELECT prod_id,
+        txn_id
+FROM sales
+WHERE qty >= 1
+)
+,penetration AS
+(SELECT DISTINCT prod_id,
+	   product_name,
+       COUNT(DISTINCT txn_id) AS prod_txn,
+       (SELECT COUNT(DISTINCT txn_id) FROM sales) AS total_txn
+FROM temp t
+LEFT JOIN product_details p ON t.prod_id = p.product_id
+GROUP BY prod_id
+)
+SELECT *,
+       CAST(100*prod_txn/total_txn AS DECIMAL(10,2)) AS penetration 
+FROM penetration
+```
+| prod_id   | product_name                     |   prod_txn |   total_txn |   penetration |
+|:----------|:---------------------------------|-----------:|------------:|--------------:|
+| 2a2353    | Blue Polo Shirt - Mens           |       1268 |        2500 |         50.72 |
+| 2feb6b    | Pink Fluro Polkadot Socks - Mens |       1258 |        2500 |         50.32 |
+| 5d267b    | White Tee Shirt - Mens           |       1268 |        2500 |         50.72 |
+| 72f5d4    | Indigo Rain Jacket - Womens      |       1250 |        2500 |         50    |
+| 9ec847    | Grey Fashion Jacket - Womens     |       1275 |        2500 |         51    |
+| b9a74d    | White Striped Socks - Mens       |       1243 |        2500 |         49.72 |
+| c4a632    | Navy Oversized Jeans - Womens    |       1274 |        2500 |         50.96 |
+| c8d436    | Teal Button Up Shirt - Mens      |       1242 |        2500 |         49.68 |
+| d5e9a6    | Khaki Suit Jacket - Womens       |       1247 |        2500 |         49.88 |
+| e31d39    | Cream Relaxed Jeans - Womens     |       1243 |        2500 |         49.72 |
+| e83aa3    | Black Straight Jeans - Womens    |       1246 |        2500 |         49.84 |
+| f084eb    | Navy Solid Socks - Mens          |       1281 |        2500 |         51.24 |
 
 **Q10. What is the most common combination of at least 1 quantity of any 3 products in a 1 single transaction?**
+```sql
+WITH prod AS (
+SELECT
+    txn_id, 
+    product_name 
+FROM sales s
+LEFT JOIN product_details PD ON s.prod_id = pd.product_id
+WHERE qty >=1
+) 
+SELECT
+  p1.product_name as product_1, 
+  p2.product_name as product_2, 
+  p3.product_name as product_3, 
+  COUNT(*) as purchase_count 
+FROM 
+  prod AS p1 
+  JOIN prod AS p2 ON p1.txn_id = p2.txn_id 
+  AND p1.product_name != p2.product_name 
+  JOIN prod AS p3 ON p1.txn_id = p3.txn_id 
+  AND p1.product_name != p3.product_name 
+  AND p2.product_name != p3.product_name 
+GROUP BY  
+  product_1, 
+  product_2, 
+  product_3 
+ORDER BY purchase_count DESC LIMIT 1
+```
+| product_1                    | product_2              | product_3                   |   purchase_count |
+|:-----------------------------|:-----------------------|:----------------------------|-----------------:|
+| Grey Fashion Jacket - Womens | White Tee Shirt - Mens | Teal Button Up Shirt - Mens |              352 |
 
 ### D. Reporting Challenge 
 Write a single SQL script that combines all of the previous questions into a scheduled report that the Balanced Tree team can run at the beginning of each month to calculate the previous month’s values.
@@ -3352,10 +3690,69 @@ He first wants you to generate the data for January only - but then he also want
 
 Feel free to split up your final outputs into as many tables as you need - but be sure to explicitly reference which table outputs relate to which question for full marks :)
 
+```sql
+
+```
+
+| month   |   total_quantity |   revenue |   net_revenue |   num_txn |
+|:--------|-----------------:|----------:|--------------:|----------:|
+| January |            14788 |    420672 |       51589.1 |       828 |
+
+
+
 ### E. Bonus Challenge
 Use a single SQL query to transform the product_hierarchy and product_prices datasets to the product_details table.
 
 Hint: you may want to consider using a recursive CTE to solve this problem!
+Solution:
+```sql
+WITH RECURSIVE cte AS (
+SELECT parent_id AS id,
+       id AS id_hierarchy,
+       level_text,
+       level_name
+FROM product_hierarchy 
+WHERE parent_id IS NOT NULL
+
+UNION 
+
+SELECT cte.id,
+       ph.id AS id_hierarchy,
+       cte.level_text,
+       cte.level_name
+FROM product_hierarchy ph
+JOIN cte ON ph.parent_id = cte.id_hierarchy
+
+)
+
+SELECT product_id,
+       price,
+       CONCAT( c2.level_text, '', c1.level_text, '', '-', '', ph.level_text) AS product_name,
+       c1.id AS category_id,
+       c1.id_hierarchy AS segment_id,
+       c2.id_hierarchy AS style_id, 
+       ph.level_text AS category_name,
+       c1.level_text AS segment_name,
+       c2.level_text AS style_name
+FROM cte c1 
+JOIN cte c2 ON c1.id_hierarchy= c2.id
+JOIN product_hierarchy ph ON c1.id = ph.id 
+JOIN product_prices pp ON c2.id_hierarchy = pp.id
+```
+| product_id   |   price | product_name                  |   category_id |   segment_id |   style_id | category_name   | segment_name   | style_name          |
+|:-------------|--------:|:------------------------------|--------------:|-------------:|-----------:|:----------------|:---------------|:--------------------|
+| 9ec847       |      54 | Grey FashionJacket-Womens     |             1 |            4 |         12 | Womens          | Jacket         | Grey Fashion        |
+| 72f5d4       |      19 | Indigo RainJacket-Womens      |             1 |            4 |         11 | Womens          | Jacket         | Indigo Rain         |
+| d5e9a6       |      23 | Khaki SuitJacket-Womens       |             1 |            4 |         10 | Womens          | Jacket         | Khaki Suit          |
+| e31d39       |      10 | Cream RelaxedJeans-Womens     |             1 |            3 |          9 | Womens          | Jeans          | Cream Relaxed       |
+| e83aa3       |      32 | Black StraightJeans-Womens    |             1 |            3 |          8 | Womens          | Jeans          | Black Straight      |
+| c4a632       |      13 | Navy OversizedJeans-Womens    |             1 |            3 |          7 | Womens          | Jeans          | Navy Oversized      |
+| 2feb6b       |      29 | Pink Fluro PolkadotSocks-Mens |             2 |            6 |         18 | Mens            | Socks          | Pink Fluro Polkadot |
+| b9a74d       |      17 | White StripedSocks-Mens       |             2 |            6 |         17 | Mens            | Socks          | White Striped       |
+| f084eb       |      36 | Navy SolidSocks-Mens          |             2 |            6 |         16 | Mens            | Socks          | Navy Solid          |
+| 2a2353       |      57 | Blue PoloShirt-Mens           |             2 |            5 |         15 | Mens            | Shirt          | Blue Polo           |
+| c8d436       |      10 | Teal Button UpShirt-Mens      |             2 |            5 |         14 | Mens            | Shirt          | Teal Button Up      |
+| 5d267b       |      40 | White TeeShirt-Mens           |             2 |            5 |         13 | Mens            | Shirt          | White Tee           |
 
 ## Case Study #8: Fresh Segments
 ### Introduction
