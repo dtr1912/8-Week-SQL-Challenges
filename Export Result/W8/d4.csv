@@ -1,0 +1,13 @@
+month_year,interest_name,max_index_composition,3_month_moving_avg,1_month_ago,2_month_ago
+2018-09-01,"Running Enthusiasts",8.26,7.61,"Running Enthusiasts : 7.21","Vacation Rental Accommodation Researchers : 7.36"
+2018-10-01,"Running Enthusiasts",9.14,8.20,"Running Enthusiasts : 8.26","Running Enthusiasts : 7.21"
+2018-11-01,"Competitive Tri-Athletes",8.28,8.56,"Running Enthusiasts : 9.14","Running Enthusiasts : 8.26"
+2018-12-01,"Winter Apparel Shoppers",8.31,8.58,"Competitive Tri-Athletes : 8.28","Running Enthusiasts : 9.14"
+2019-01-01,"Winter Apparel Shoppers",7.66,8.08,"Winter Apparel Shoppers : 8.31","Competitive Tri-Athletes : 8.28"
+2019-02-01,"Winter Apparel Shoppers",7.66,7.88,"Winter Apparel Shoppers : 7.66","Winter Apparel Shoppers : 8.31"
+2019-03-01,"Winter Apparel Shoppers",6.54,7.29,"Winter Apparel Shoppers : 7.66","Winter Apparel Shoppers : 7.66"
+2019-04-01,"Winter Apparel Shoppers",6.28,6.83,"Winter Apparel Shoppers : 6.54","Winter Apparel Shoppers : 7.66"
+2019-05-01,"Winter Apparel Shoppers",4.41,5.74,"Winter Apparel Shoppers : 6.28","Winter Apparel Shoppers : 6.54"
+2019-06-01,"Winter Apparel Shoppers",2.77,4.49,"Winter Apparel Shoppers : 4.41","Winter Apparel Shoppers : 6.28"
+2019-07-01,"Winter Apparel Shoppers",2.82,3.33,"Winter Apparel Shoppers : 2.77","Winter Apparel Shoppers : 4.41"
+2019-08-01,"Winter Apparel Shoppers",2.73,2.77,"Winter Apparel Shoppers : 2.82","Winter Apparel Shoppers : 2.77"

@@ -21,6 +21,7 @@ CREATE TEMPORARY TABLE customer_orders_pre AS (
   	order_time
   FROM customer_orders);
 SELECT * FROM customer_orders_pre
+
 DROP TABLE IF EXISTS customer_orders_cleaned;
 CREATE TEMPORARY TABLE customer_orders_cleaned AS (
 SELECT t.order_id,
@@ -95,4 +96,12 @@ SELECT * FROM pizza_recipes_cleaned
 -- Check table pizza_toppings
 -- SELECT * FROM pizza_toppings
 -- DESCIRBE pizza_toppings
-SELECT * FROM pizza_recipes
+DROP TABLE IF EXISTS pizza_recipes_name; 
+CREATE TEMPORARY TABLE pizza_recipes_name(
+SELECT pizza_id, 
+	   GROUP_CONCAT(topping_name ORDER BY pizza_id ASC SEPARATOR ', ') AS topping_name
+FROM pizza_recipes_cleaned r
+JOIN pizza_toppings t  ON r.topping = t.topping_id
+GROUP BY pizza_id
+)
+SELECT * FROM pizza_recipes_name

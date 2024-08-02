@@ -52,4 +52,4 @@ FROM upgrade_plan
 WHERE plan_name != 'churn'
 ORDER BY customer_id
 )
-
+SELECT * FROM payments

@@ -15,7 +15,7 @@ FROM all_week
 WHERE week_number NOT IN (SELECT week_number FROM clean_weekly_sales)
 -- How many total transactions were there for each year in the dataset?
 SELECT calendar_year,
-       SUM(transactions) AS total_transactions
+       CAST(SUM(transactions) AS DECIMAL) AS total_transactions
 FROM clean_weekly_sales
 GROUP BY calendar_year
 ORDER BY calendar_year
@@ -59,7 +59,6 @@ SELECT
 FROM clean_weekly_sales
 GROUP BY calendar_year, 
          demographic
-         
 -- Which age_band and demographic values contribute the most to Retail sales?
 SELECT
   age_band, 

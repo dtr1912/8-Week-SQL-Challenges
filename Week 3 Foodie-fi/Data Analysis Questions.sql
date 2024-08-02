@@ -12,8 +12,10 @@ GROUP BY start_month, start_year
 ORDER BY COUNT(s.plan_id) DESC
 -- 3. What plan start_date values occur after the year 2020 for our dataset? Show the breakdown by count of events for each plan_name
 SELECT plan_name, 
-       COUNT(s.plan_id) as 'Number of plan',
+       COUNT(s.plan_id) as 'number of plan',
        YEAR(start_date) start_year
+FROM subscriptions s
+JOIN plans p ON s.plan_id = p.plan_id
 WHERE  YEAR(start_date) > 2020
 GROUP BY s.plan_id
 ORDER BY COUNT(s.plan_id) DESC
@@ -82,6 +84,7 @@ SELECT customer_id,
 FROM subscriptions s
 JOIN plans p ON s.plan_id = p.plan_id
 WHERE plan_name = 'pro annual')
+
 WITH temp1 AS (
 SELECT s.customer_id,
        s.start_date, 
@@ -118,6 +121,7 @@ FROM trial_plan tp
 JOIN annual_plan ap ON tp.customer_id = ap.customer_id
 WHERE ap.annual_date IS NOT NULL
 GROUP BY FLOOR(TIMESTAMPDIFF(day, trial_date, annual_date) / 30);
+
 -- 11.How many customers downgraded from a pro monthly to a basic monthly plan in 2020?
 WITH temp AS
 (SELECT *, 

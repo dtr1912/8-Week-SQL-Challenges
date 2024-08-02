@@ -1,6 +1,7 @@
 -- Update the fresh_segments.interest_metrics table by modifying the month_year column to be a date data type with the start of the month
 ALTER TABLE interest_metrics 
 MODIFY COLUMN month_year VARCHAR(10)
+
 UPDATE interest_metrics 
 SET month_year = CAST(CONCAT(_year,'-',_month,'-','01') AS DATE) 
 -- What is count of records in the fresh_segments.interest_metrics for each month_year value sorted in chronological order 

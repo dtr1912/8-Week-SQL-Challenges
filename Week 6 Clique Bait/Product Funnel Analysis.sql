@@ -70,6 +70,9 @@ LEFT JOIN abandoned a ON p.product_id = a.product_id
 LEFT JOIN purchased pc ON p.product_id = pc.product_id
 ORDER BY product_id
 )
+
+SELECT * FROM product
+
 -- Additionally, create another table which further aggregates the data for the above points but this time for each product category instead of individual products.
 DROP TABLE IF EXISTS product_category; 
 CREATE TABLE product_category AS(
@@ -124,22 +127,27 @@ LEFT JOIN abandoned a ON p.product_category = a.product_category
 LEFT JOIN purchased pc ON p.product_category = pc.product_category
 ORDER BY product_category
 )
+
+SELECT * FROM product_category
+
 -- Use your 2 new output tables - answer the following questions:
+
 -- Which product had the most views, cart adds and purchases?
+-- the most views
 SELECT product_id,
        page_name,
        product_category,
        product_viewed
 FROM product
 ORDER BY product_viewed DESC LIMIT 1
-
+-- the most cart adds 
 SELECT product_id,
        page_name,
        product_category,
        added_cart
 FROM product
 ORDER BY added_cart DESC LIMIT 1
-
+-- the most purchases
 SELECT product_id,
        page_name,
        product_category,
@@ -161,10 +169,12 @@ SELECT product_id,
 FROM product
 ORDER BY 100*purchased_product/product_viewed DESC LIMIT 1
 -- What is the average conversion rate from view to cart add?
-SELECT 
-       AVG(100*added_cart/product_viewed) AS avg_view_to_cart
+SELECT product_id,
+       page_name,
+       product_category,
+       100*purchased_product/product_viewed AS pct_view_to_purchase
 FROM product
-
+ORDER BY 100*purchased_product/product_viewed DESC LIMIT 1
 -- What is the average conversion rate from cart add to purchase?
 SELECT 
        AVG(100*purchased_product/added_cart) AS avg_cart_to_purchase

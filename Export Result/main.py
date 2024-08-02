@@ -1,7 +1,7 @@
 import pandas as pd
 import glob
 from tabulate import tabulate
-csv_files = glob.glob('W1/*.csv')
+csv_files = glob.glob('W8/*.csv')
 markdown_tables = []
 for file in csv_files:
     df = pd.read_csv(file)
@@ -10,5 +10,5 @@ for file in csv_files:
     markdown_tables.append(f"{table_title}\n\n{markdown_table}\n")
 
 combined_markdown = "\n\n".join(markdown_tables)
-with open('combined_results_1.md', 'w') as f:
+with open('combined_results_8.md', 'w') as f:
     f.write(combined_markdown)

@@ -36,4 +36,4 @@ SELECT week_date,
        avg_transactions
 FROM clean
 )
-       
+SELECT * FROM clean_weekly_sales;

@@ -1,0 +1,13 @@
+product_id,price,product_name,category_id,segment_id,style_id,category_name,segment_name,style_name
+9ec847,54,"Grey FashionJacket-Womens",1,4,12,Womens,Jacket,"Grey Fashion"
+72f5d4,19,"Indigo RainJacket-Womens",1,4,11,Womens,Jacket,"Indigo Rain"
+d5e9a6,23,"Khaki SuitJacket-Womens",1,4,10,Womens,Jacket,"Khaki Suit"
+e31d39,10,"Cream RelaxedJeans-Womens",1,3,9,Womens,Jeans,"Cream Relaxed"
+e83aa3,32,"Black StraightJeans-Womens",1,3,8,Womens,Jeans,"Black Straight"
+c4a632,13,"Navy OversizedJeans-Womens",1,3,7,Womens,Jeans,"Navy Oversized"
+2feb6b,29,"Pink Fluro PolkadotSocks-Mens",2,6,18,Mens,Socks,"Pink Fluro Polkadot"
+b9a74d,17,"White StripedSocks-Mens",2,6,17,Mens,Socks,"White Striped"
+f084eb,36,"Navy SolidSocks-Mens",2,6,16,Mens,Socks,"Navy Solid"
+2a2353,57,"Blue PoloShirt-Mens",2,5,15,Mens,Shirt,"Blue Polo"
+c8d436,10,"Teal Button UpShirt-Mens",2,5,14,Mens,Shirt,"Teal Button Up"
+5d267b,40,"White TeeShirt-Mens",2,5,13,Mens,Shirt,"White Tee"

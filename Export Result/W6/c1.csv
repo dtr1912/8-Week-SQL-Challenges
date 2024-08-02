@@ -1,0 +1,10 @@
+product_id,page_name,product_category,product_viewed,added_cart,abandoned_product,purchased_product
+1,Salmon,Fish,1559,938,227,711
+2,Kingfish,Fish,1559,920,213,707
+3,Tuna,Fish,1515,931,234,697
+4,"Russian Caviar",Luxury,1563,946,249,697
+5,"Black Truffle",Luxury,1469,924,217,707
+6,Abalone,Shellfish,1525,932,233,699
+7,Lobster,Shellfish,1547,968,214,754
+8,Crab,Shellfish,1564,949,230,719
+9,Oyster,Shellfish,1568,943,217,726

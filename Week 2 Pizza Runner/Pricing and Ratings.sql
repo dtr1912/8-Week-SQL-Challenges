@@ -27,6 +27,7 @@ JOIN runner_orders_cleaned r1 ON c.order_id =r1.order_id
 JOIN pizza_names p1 ON c.pizza_id = p1.pizza_id
 WHERE cancellation is null 
 )
+
 DROP TABLE IF EXISTS pizza_extra;
 CREATE TEMPORARY TABLE pizza_extra AS 
 (SELECT COUNT(extra) total
@@ -35,6 +36,7 @@ JOIN runner_orders_cleaned r1 ON c.order_id =r1.order_id
 JOIN JSON_TABLE(TRIM(REPLACE(JSON_ARRAY(c.extras),',','","')),'$[*]' columns(extra varchar(5) path '$')) j
 WHERE cancellation is null 
 )
+
 WITH temp AS 
 (SELECT total 
 FROM pizza_price
@@ -58,6 +60,7 @@ VALUES
   (7,3),
   (8,4),
   (10,3);
+  
  SELECT *
  FROM ratings;
 -- 4.Using your newly generated table - can you join all of the information together to form a table which has the following information for successful deliveries?

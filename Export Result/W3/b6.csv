@@ -1,0 +1,5 @@
+next_plan,customer_plan,number_customer,perc_plan
+"basic monthly",546,1000,54.6%
+churn,92,1000,9.2%
+"pro annual",37,1000,3.7%
+"pro monthly",325,1000,32.5%

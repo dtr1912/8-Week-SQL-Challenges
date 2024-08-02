@@ -9,6 +9,7 @@ FROM interest_metrics
 GROUP BY interest_id
 HAVING COUNT(DISTINCT month_year) >= 6
 )
+SELECT * FROM filtered
 -- top 10 interests which have the largest composition values
 WITH cte AS
 (

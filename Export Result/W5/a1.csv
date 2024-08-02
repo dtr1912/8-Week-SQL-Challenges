@@ -1,0 +1,11 @@
+week_date,week_number,month_number,calendar_year,region,platform,customer_type,age_band,demographic,transactions,sales,avg_transactions
+2020-08-31,35,8,2020,ASIA,Retail,New,Retirees,Couples,120631,3656163,30.31
+2020-08-31,35,8,2020,ASIA,Retail,New,"Young Adults",Families,31574,996575,31.56
+2020-08-31,35,8,2020,USA,Retail,Guest,unknown,unknown,529151,16509610,31.20
+2020-08-31,35,8,2020,EUROPE,Retail,New,"Young Adults",Couples,4517,141942,31.42
+2020-08-31,35,8,2020,AFRICA,Retail,New,"Middle Aged",Couples,58046,1758388,30.29
+2020-08-31,35,8,2020,CANADA,Shopify,Existing,"Middle Aged",Families,1336,243878,182.54
+2020-08-31,35,8,2020,AFRICA,Shopify,Existing,Retirees,Families,2514,519502,206.64
+2020-08-31,35,8,2020,ASIA,Shopify,Existing,"Young Adults",Families,2158,371417,172.11
+2020-08-31,35,8,2020,AFRICA,Shopify,New,"Middle Aged",Families,318,49557,155.84
+2020-08-31,35,8,2020,AFRICA,Retail,New,Retirees,Couples,111032,3888162,35.02

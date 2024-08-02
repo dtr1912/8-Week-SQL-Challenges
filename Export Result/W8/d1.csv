@@ -1,0 +1,151 @@
+interest_id,interest_name,month_year,composition,index_value,avg_composition,rnk
+6324,"Las Vegas Trip Planners",2018-07-01,10.3,1.4,7.36,1
+6284,"Gym Equipment Owners",2018-07-01,18.82,2.71,6.94,2
+4898,"Cosmetics and Beauty Shoppers",2018-07-01,14.23,2.1,6.78,3
+77,"Luxury Retail Shoppers",2018-07-01,17.19,2.6,6.61,4
+39,"Furniture Shoppers",2018-07-01,17.44,2.68,6.51,5
+18619,"Asian Food Enthusiasts",2018-07-01,9.15,1.5,6.10,6
+6208,"Recently Retired Individuals",2018-07-01,9.67,1.69,5.72,7
+21060,"Family Adventures Travelers",2018-07-01,8.58,1.77,4.85,8
+21057,"Work Comes First Travelers",2018-07-01,10.95,2.28,4.80,9
+82,"HDTV Researchers",2018-07-01,9.99,2.12,4.71,10
+6324,"Las Vegas Trip Planners",2018-08-01,8.43,1.17,7.21,1
+6284,"Gym Equipment Owners",2018-08-01,13.9,2.1,6.62,2
+77,"Luxury Retail Shoppers",2018-08-01,12.73,1.95,6.53,3
+39,"Furniture Shoppers",2018-08-01,12.03,1.91,6.30,4
+4898,"Cosmetics and Beauty Shoppers",2018-08-01,7.98,1.27,6.28,5
+21057,"Work Comes First Travelers",2018-08-01,12.42,2.18,5.70,6
+18619,"Asian Food Enthusiasts",2018-08-01,6.59,1.16,5.68,7
+6208,"Recently Retired Individuals",2018-08-01,6.59,1.18,5.58,8
+7541,"Alabama Trip Planners",2018-08-01,6.09,1.26,4.83,9
+5969,"Luxury Bedding Shoppers",2018-08-01,10.85,2.3,4.72,10
+21057,"Work Comes First Travelers",2018-09-01,18.18,2.2,8.26,1
+21245,"Readers of Honduran Content",2018-09-01,3.95,0.52,7.60,2
+7541,"Alabama Trip Planners",2018-09-01,9.23,1.27,7.27,3
+5969,"Luxury Bedding Shoppers",2018-09-01,14.29,2.03,7.04,4
+18783,"Nursing and Physicians Assistant Journal Researchers",2018-09-01,8.51,1.27,6.70,5
+10981,"New Years Eve Party Ticket Purchasers",2018-09-01,8.77,1.33,6.59,6
+34,"Teen Girl Clothing Shoppers",2018-09-01,9.08,1.39,6.53,7
+10977,"Christmas Celebration Researchers",2018-09-01,10.61,1.64,6.47,8
+13497,"Restaurant Supply Shoppers",2018-09-01,8.12,1.3,6.25,9
+6065,"Solar Energy Researchers",2018-09-01,4.24,0.68,6.24,10
+21057,"Work Comes First Travelers",2018-10-01,20.28,2.22,9.14,1
+7541,"Alabama Trip Planners",2018-10-01,9.3,1.31,7.10,2
+21245,"Readers of Honduran Content",2018-10-01,3.3,0.47,7.02,3
+18783,"Nursing and Physicians Assistant Journal Researchers",2018-10-01,9.83,1.4,7.02,3
+5969,"Luxury Bedding Shoppers",2018-10-01,14.15,2.04,6.94,4
+10981,"New Years Eve Party Ticket Purchasers",2018-10-01,10.09,1.46,6.91,5
+34,"Teen Girl Clothing Shoppers",2018-10-01,10.04,1.48,6.78,6
+10977,"Christmas Celebration Researchers",2018-10-01,12.16,1.81,6.72,7
+12133,"Luxury Boutique Hotel Researchers",2018-10-01,15.15,2.32,6.53,8
+6065,"Solar Energy Researchers",2018-10-01,4.03,0.62,6.50,9
+15879,Freelancers,2018-10-01,8.65,1.35,6.41,10
+21057,"Work Comes First Travelers",2018-11-01,19.45,2.35,8.28,1
+21245,"Readers of Honduran Content",2018-11-01,3.83,0.54,7.09,2
+6065,"Solar Energy Researchers",2018-11-01,3.95,0.56,7.05,3
+7541,"Alabama Trip Planners",2018-11-01,8.43,1.26,6.69,4
+18783,"Nursing and Physicians Assistant Journal Researchers",2018-11-01,9.04,1.36,6.65,5
+5969,"Luxury Bedding Shoppers",2018-11-01,14.92,2.28,6.54,6
+10981,"New Years Eve Party Ticket Purchasers",2018-11-01,9.85,1.56,6.31,7
+10977,"Christmas Celebration Researchers",2018-11-01,10.88,1.79,6.08,8
+34,"Teen Girl Clothing Shoppers",2018-11-01,9.34,1.57,5.95,9
+13497,"Restaurant Supply Shoppers",2018-11-01,8.1,1.45,5.59,10
+21057,"Work Comes First Travelers",2018-12-01,21.2,2.55,8.31,1
+18783,"Nursing and Physicians Assistant Journal Researchers",2018-12-01,9.6,1.38,6.96,2
+7541,"Alabama Trip Planners",2018-12-01,9.62,1.44,6.68,3
+5969,"Luxury Bedding Shoppers",2018-12-01,15.05,2.27,6.63,4
+21245,"Readers of Honduran Content",2018-12-01,3.49,0.53,6.58,5
+6065,"Solar Energy Researchers",2018-12-01,3.47,0.53,6.55,6
+10981,"New Years Eve Party Ticket Purchasers",2018-12-01,10.62,1.64,6.48,7
+34,"Teen Girl Clothing Shoppers",2018-12-01,11.23,1.76,6.38,8
+10977,"Christmas Celebration Researchers",2018-12-01,11.57,1.9,6.09,9
+21237,"Chelsea Fans",2018-12-01,9.72,1.66,5.86,10
+21057,"Work Comes First Travelers",2019-01-01,18.99,2.48,7.66,1
+6065,"Solar Energy Researchers",2019-01-01,4.02,0.57,7.05,2
+21245,"Readers of Honduran Content",2019-01-01,3.8,0.57,6.67,3
+18783,"Nursing and Physicians Assistant Journal Researchers",2019-01-01,9.04,1.4,6.46,4
+5969,"Luxury Bedding Shoppers",2019-01-01,14.92,2.31,6.46,4
+7541,"Alabama Trip Planners",2019-01-01,9.6,1.49,6.44,5
+10981,"New Years Eve Party Ticket Purchasers",2019-01-01,9.91,1.61,6.16,6
+34,"Teen Girl Clothing Shoppers",2019-01-01,10.07,1.69,5.96,7
+10977,"Christmas Celebration Researchers",2019-01-01,10.96,1.94,5.65,8
+21237,"Chelsea Fans",2019-01-01,9.2,1.68,5.48,9
+15878,"Readers of Catholic News",2019-01-01,4.77,0.87,5.48,9
+19621,"Portugal Trip Planners",2019-01-01,9.08,1.69,5.37,10
+21057,"Work Comes First Travelers",2019-02-01,18.39,2.4,7.66,1
+18783,"Nursing and Physicians Assistant Journal Researchers",2019-02-01,8.28,1.21,6.84,2
+5969,"Luxury Bedding Shoppers",2019-02-01,14.39,2.13,6.76,3
+7541,"Alabama Trip Planners",2019-02-01,9.98,1.5,6.65,4
+6065,"Solar Energy Researchers",2019-02-01,3.95,0.6,6.58,5
+10981,"New Years Eve Party Ticket Purchasers",2019-02-01,9.65,1.47,6.56,6
+34,"Teen Girl Clothing Shoppers",2019-02-01,9.24,1.47,6.29,7
+21245,"Readers of Honduran Content",2019-02-01,3.18,0.51,6.24,8
+19620,"PlayStation Enthusiasts",2019-02-01,3.99,0.64,6.23,9
+10977,"Christmas Celebration Researchers",2019-02-01,10.52,1.76,5.98,10
+7541,"Alabama Trip Planners",2019-03-01,9.88,1.51,6.54,1
+18783,"Nursing and Physicians Assistant Journal Researchers",2019-03-01,8.87,1.36,6.52,2
+5969,"Luxury Bedding Shoppers",2019-03-01,12.3,1.9,6.47,3
+6065,"Solar Energy Researchers",2019-03-01,3.84,0.6,6.40,4
+21245,"Readers of Honduran Content",2019-03-01,2.98,0.48,6.21,5
+10981,"New Years Eve Party Ticket Purchasers",2019-03-01,9.06,1.46,6.21,5
+19620,"PlayStation Enthusiasts",2019-03-01,4.24,0.7,6.06,6
+34,"Teen Girl Clothing Shoppers",2019-03-01,8.48,1.41,6.01,7
+15878,"Readers of Catholic News",2019-03-01,4.58,0.81,5.65,8
+10977,"Christmas Celebration Researchers",2019-03-01,10.5,1.87,5.61,9
+13497,"Restaurant Supply Shoppers",2019-03-01,8.31,1.48,5.61,9
+6343,"Patio Furniture Shoppers",2019-03-01,10.48,1.91,5.49,10
+6065,"Solar Energy Researchers",2019-04-01,3.64,0.58,6.28,1
+7541,"Alabama Trip Planners",2019-04-01,8.94,1.44,6.21,2
+5969,"Luxury Bedding Shoppers",2019-04-01,11.01,1.82,6.05,3
+21245,"Readers of Honduran Content",2019-04-01,3.19,0.53,6.02,4
+18783,"Nursing and Physicians Assistant Journal Researchers",2019-04-01,7.87,1.31,6.01,5
+10981,"New Years Eve Party Ticket Purchasers",2019-04-01,8.36,1.48,5.65,6
+19620,"PlayStation Enthusiasts",2019-04-01,3.92,0.71,5.52,7
+34,"Teen Girl Clothing Shoppers",2019-04-01,7.87,1.46,5.39,8
+15878,"Readers of Catholic News",2019-04-01,4.08,0.77,5.30,9
+13497,"Restaurant Supply Shoppers",2019-04-01,7.46,1.47,5.07,10
+21245,"Readers of Honduran Content",2019-05-01,2.91,0.66,4.41,1
+15878,"Readers of Catholic News",2019-05-01,3.02,0.74,4.08,2
+6065,"Solar Energy Researchers",2019-05-01,2.78,0.71,3.92,3
+19620,"PlayStation Enthusiasts",2019-05-01,2.59,0.73,3.55,4
+7541,"Alabama Trip Planners",2019-05-01,5.31,1.59,3.34,5
+2,Gamers,2019-05-01,2.27,0.69,3.29,6
+5969,"Luxury Bedding Shoppers",2019-05-01,7.53,2.32,3.25,7
+10981,"New Years Eve Party Ticket Purchasers",2019-05-01,6.02,1.89,3.19,8
+15884,"Video Gamers",2019-05-01,2.23,0.7,3.19,8
+18783,"Nursing and Physicians Assistant Journal Researchers",2019-05-01,4.57,1.45,3.15,9
+4917,"Teen Content Readers",2019-05-01,2.95,0.94,3.14,10
+6324,"Las Vegas Trip Planners",2019-06-01,4.59,1.66,2.77,1
+6284,"Gym Equipment Owners",2019-06-01,6.94,2.72,2.55,2
+4898,"Cosmetics and Beauty Shoppers",2019-06-01,3.54,1.39,2.55,2
+18619,"Asian Food Enthusiasts",2019-06-01,3.32,1.32,2.52,3
+77,"Luxury Retail Shoppers",2019-06-01,5.53,2.25,2.46,4
+39,"Furniture Shoppers",2019-06-01,6.03,2.52,2.39,5
+6253,"Medicare Researchers",2019-06-01,3.85,1.64,2.35,6
+6208,"Recently Retired Individuals",2019-06-01,4.24,1.87,2.27,7
+7535,"Medicare Provider Researchers",2019-06-01,4.67,2.11,2.21,8
+107,"Cruise Travel Intenders",2019-06-01,4.15,1.89,2.20,9
+82,"HDTV Researchers",2019-06-01,4.05,1.96,2.07,10
+6324,"Las Vegas Trip Planners",2019-07-01,4.17,1.48,2.82,1
+77,"Luxury Retail Shoppers",2019-07-01,6.52,2.32,2.81,2
+6284,"Gym Equipment Owners",2019-07-01,7.19,2.58,2.79,3
+39,"Furniture Shoppers",2019-07-01,7.16,2.57,2.79,3
+18619,"Asian Food Enthusiasts",2019-07-01,3.7,1.33,2.78,4
+4898,"Cosmetics and Beauty Shoppers",2019-07-01,3.98,1.43,2.78,4
+6253,"Medicare Researchers",2019-07-01,4.8,1.73,2.77,5
+7535,"Medicare Provider Researchers",2019-07-01,5.67,2.08,2.73,6
+6208,"Recently Retired Individuals",2019-07-01,4.98,1.83,2.72,7
+7536,"Medicare Price Shoppers",2019-07-01,4.63,1.74,2.66,8
+107,"Cruise Travel Intenders",2019-07-01,4.81,1.88,2.56,9
+82,"HDTV Researchers",2019-07-01,4.61,1.87,2.47,10
+4898,"Cosmetics and Beauty Shoppers",2019-08-01,4.12,1.51,2.73,1
+6284,"Gym Equipment Owners",2019-08-01,7.1,2.61,2.72,2
+6324,"Las Vegas Trip Planners",2019-08-01,4,1.48,2.70,3
+18619,"Asian Food Enthusiasts",2019-08-01,3.67,1.37,2.68,4
+6065,"Solar Energy Researchers",2019-08-01,2.13,0.8,2.66,5
+77,"Luxury Retail Shoppers",2019-08-01,6.48,2.5,2.59,6
+39,"Furniture Shoppers",2019-08-01,6.76,2.61,2.59,6
+4931,"Marijuana Legalization Advocates",2019-08-01,2.46,0.96,2.56,7
+6253,"Medicare Researchers",2019-08-01,4.28,1.68,2.55,8
+6208,"Recently Retired Individuals",2019-08-01,4.41,1.74,2.53,9
+6225,"Piercing Fans",2019-08-01,2.15,0.86,2.50,10
