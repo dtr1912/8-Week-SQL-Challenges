@@ -321,7 +321,7 @@ Result:
 | A             |          1370 |
 | B             |           820 |
 
-### B.Bonus Questions
+### B. Bonus Questions
 **Join All The Things**
 
 The following questions are related creating basic data tables that Danny and his team can use to quickly derive insights without needing to join the underlying tables using SQL.
@@ -1771,7 +1771,18 @@ Solution:
 Solution:
 
 ## Case Study #4: Data Bank
+### Introduction
+There is a new innovation in the financial industry called Neo-Banks: new aged digital only banks without physical branches.
 
+Danny thought that there should be some sort of intersection between these new age banks, cryptocurrency and the data world…so he decides to launch a new initiative - Data Bank!
+
+Data Bank runs just like any other digital bank - but it isn’t only for banking activities, they also have the world’s most secure distributed data storage platform!
+
+Customers are allocated cloud data storage limits which are directly linked to how much money they have in their accounts. There are a few interesting caveats that go with this business model, and this is where the Data Bank team need your help!
+
+The management team at Data Bank want to increase their total customer base - but also need some help tracking just how much data storage their customers will need.
+
+This case study is all about calculating metrics, growth and helping the business analyse their data in a smart way to better forecast and plan for their future developments!
 ### A. Customer Nodes Exploration
 ### B. Customer Transactions
 ### C. Data Allocation Challenge
@@ -1779,18 +1790,39 @@ Solution:
 ### E. Extension Request
 
 ## Case Study #5: Data Mart
+### Introduction
+Data Mart is Danny’s latest venture and after running international operations for his online supermarket that specialises in fresh produce - Danny is asking for your support to analyse his sales performance.
+
+In June 2020 - large scale supply changes were made at Data Mart. All Data Mart products now use sustainable packaging methods in every single step from the farm all the way to the customer.
+
+Danny needs your help to quantify the impact of this change on the sales performance for Data Mart and it’s separate business areas.
+
+The key business question he wants you to help him answer are the following:
+
+What was the quantifiable impact of the changes introduced in June 2020?
+Which platform, region, segment and customer types were the most impacted by this change?
+What can we do about future introduction of similar sustainability updates to the business to minimise impact on sales?
 ### A. Data Cleansing Steps
 ### B. Data Exploration
 ### C. Before & After Analysis
 ### D. Bonus Question
 
 ## Case Study #6: Clique Bait
+### Introduction
+Clique Bait is not like your regular online seafood store - the founder and CEO Danny, was also a part of a digital data analytics team and wanted to expand his knowledge into the seafood industry!
+
+In this case study - you are required to support Danny’s vision and analyse his dataset and come up with creative solutions to calculate funnel fallout rates for the Clique Bait online store.
 ### A. Enterprise Relationship Diagram
 ### B. Digital Analysis
 ### C. Product Funnel Analysis
 ### D. Campaigns Analysis
 
 ## Case Study #7: Balanced Tree
+### Introduction
+Balanced Tree Clothing Company prides themselves on providing an optimised range of clothing and lifestyle wear for the modern adventurer!
+
+Danny, the CEO of this trendy fashion company has asked you to assist the team’s merchandising teams analyse their sales performance and generate a basic financial report to share with the wider business.
+
 ### A. High Level Sales Analysis
 ### B. Transactional Analysis
 ### C. Product Analysis
@@ -1798,6 +1830,15 @@ Solution:
 ### E. Bonus Challenge
 
 ## Case Study #8: Fresh Segments
+### Introduction
+Danny created Fresh Segments, a digital marketing agency that helps other businesses analyse trends in online ad click behaviour for their unique customer base.
+
+Clients share their customer lists with the Fresh Segments team who then aggregate interest metrics and generate a single dataset worth of metrics for further analysis.
+
+In particular - the composition and rankings for different interests are provided for each client showing the proportion of their customer list who interacted with online assets related to each interest for each month.
+
+Danny has asked for your assistance to analyse aggregated metrics for an example client and provide some high level insights about the customer list and their interests.
+
 ### A. Data Exploration and Cleansing
 ### B. Interest Anlysis
 ### C. Segment Analysis
