@@ -2499,6 +2499,7 @@ We would include all week_date values for 2020-06-15 as the start of the period 
 Using this analysis approach - answer the following questions:
 
 **Q1. What is the total sales for the 4 weeks before and after 2020-06-15? What is the growth or reduction rate in actual values and percentage of sales?**
+
 ```sql 
 WITH sales AS (
 SELECT 
@@ -2520,6 +2521,7 @@ Result:
 
 
 **Q2. What about the entire 12 weeks before and after?**
+
 ```sql
 WITH sales AS (
 SELECT 
@@ -2544,6 +2546,7 @@ Result:
 Solution: 
 
 ### D. Bonus Question
+
 Which areas of the business have the highest negative impact in sales metrics performance in 2020 for the 12 week before and after period?
 
 - region
@@ -2551,6 +2554,7 @@ Which areas of the business have the highest negative impact in sales metrics pe
 - age_band
 - demographic
 - customer_type
+
 **Do you have any further recommendations for Danny’s team at Data Mart or any interesting insights based off this analysis?**
 
 ```sql
