@@ -3,8 +3,8 @@ The solution for the 8 case studies from the **[#8WeekSQLChallenge](https://8wee
 ## 📚 Table of Contents
 Please find the solution links for the case studies below. Simply click on the links to access each solution.
 - [Case Study #1: Danny's Diner](#case-study-1-dannys-diner)
-  - [Case Study Questions](#case-study-questions)
-  - [Bonus Questions](#bonus-questions)
+  - [A. Case Study Questions](#a-case-study-questions)
+  - [B. Bonus Questions](#b-bonus-questions)
 - [Case Study #2: Pizza Runner](#case-study-2-pizza-runner)
   - [Data Cleaning](#data-cleaning)
   - [A. Pizza Metrics](#a-pizza-metrics)
@@ -13,11 +13,38 @@ Please find the solution links for the case studies below. Simply click on the l
   - [D. Pricing and Ratings](#d-pricing-and-ratings)
   - [E. Bonus Questions](#e-bonus-questions)
 - [Case Study #3: Foodie-Fi](#case-study-3-foodie-fi)
+  - [A. Customer Journey)(#a-customer-journey)
+  - [B. Data Analysis Questions](#b-data-analysis)
+  - [C. Challenge Payment Question](#c-challenge-payment-question)
+  - [D. Outside The Box Questions](#d-outside-the-box-questions)
 - [Case Study #4: Data Bank](#case-study-4-data-bank)
+  - [A. Customer Nodes Exploration](#a-customer-nodes-exploration)
+  - [B. Customer Transactions](#b-customer-transaction)
+  - [C. Data Allocation Challenge](#c-data-allocation-challenge)
+  - [D. Extra Challenge](#d-extra-challenge)
+  - [E. Extension Request](#e-extension-request)
 - [Case Study #5: Data Mart](#case-study-5-data-mart)
+  - [A. Data Cleansing Steps](#a-data-cleansing-steps)
+  - [B. Data Exploration](#b-data-exploration)
+  - [C. Before & After Analysis](#c-before-&after-analysis)
+  - [D. Bonus Question](#d-bonus-questions)
 - [Case Study #6: Clique Bait](#case-study-6-clique-bait)
+  - [A. Enterprise Relationship Diagram](#a-enterprise-relationship-diagram)
+  - [B. Digital Analysis](#b-digital-analysis)
+  - [C. Product Funnel Analysis](#c-product-funel-analysis)
+  - [D. Campaigns Analysis](#d-campaign-analysis)
 - [Case Study #7: Balanced Tree](#case-study-7-balanced-tree)
+  - [A. High Level Sales Analysis](#a-high-level-sales-analysis)
+  - [B. Transaction Analysis](#b-transaction-analysis)
+  - [C. Product Analysis](#c-product-analysis)
+  - [D. Reporting Challenge](#d-reporting-challenge)
+  - [E. Bonus Challenge](#e-bonus-challenge)
 - [Case Study #8: Fresh Segments](#case-study-8-fresh-segments)
+  - [A. Data Exploration and Cleansing](#a-data-exploration-and-cleansing)
+  - [B. Interest Analysis](#b-interest-analysis)
+  - [C. Segment analysis](#c-segment-analysis)
+  - [D. Index Analysis](#a-index-analysis)
+
 ## Case Study #1: Danny's Diner
 ### Introduction
 Danny seriously loves Japanese food so in the beginning of 2021, he decides to embark upon a risky venture and opens up a cute little restaurant that sells his 3 favourite foods: sushi, curry and ramen.
@@ -29,7 +56,7 @@ Danny wants to use the data to answer a few simple questions about his customers
 
 He plans on using these insights to help him decide whether he should expand the existing customer loyalty program - additionally he needs help to generate some basic datasets so his team can easily inspect the data without needing to use SQL.
 
-### Case Study Questions
+### A. Case Study Questions
 
 **Q1: What is the total amount each customer spent at the restaurant?**
 
@@ -294,7 +321,7 @@ Result:
 | A             |          1370 |
 | B             |           820 |
 
-### Bonus Questions
+### B.Bonus Questions
 **Join All The Things**
 
 The following questions are related creating basic data tables that Danny and his team can use to quickly derive insights without needing to join the underlying tables using SQL.
@@ -1340,6 +1367,7 @@ VALUES (3, '1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12');
 
 ## Case Study #3: Foodie-Fi
 ### Introduction 
+
 Subscription based businesses are super popular and Danny realised that there was a large gap in the market - he wanted to create a new streaming service that only had food related content - something like Netflix but with only cooking shows!
 
 Danny finds a few smart friends to launch his new startup Foodie-Fi in 2020 and started selling monthly and annual subscriptions, giving their customers unlimited on-demand access to exclusive food videos from around the world!
@@ -1347,6 +1375,7 @@ Danny finds a few smart friends to launch his new startup Foodie-Fi in 2020 and 
 Danny created Foodie-Fi with a data driven mindset and wanted to ensure all future investment decisions and new features were decided using data. This case study focuses on using subscription style digital data to answer important business questions.
 
 ### A. Customer Journey
+
 Based off the 8 sample customers provided in the sample from the subscriptions table, write a brief description about each customer’s onboarding journey.
 
 Try to keep it as short as possible - you may also want to run some sort of join to make your explanations a bit easier!
@@ -1722,23 +1751,54 @@ Result:
 |       12 |   14712.9 |         13610 |         0.074961 |
 
 **Q2. What key metrics would you recommend Foodie-Fi management to track over time to assess performance of their overall business?**
+
 Solution:
 Key metrics: revenue growth by monthly, churn rate, customer growth
 
 **Q3. What are some key customer journeys or experiences that you would analyse further to improve customer retention?**
+
 Solution:
 - Customers who downgraded their plan
 - Customers who upgraded from basic monthly to pro monthly or pro annual
 - Customers who cancelled the subscription
 
 **Q4. If the Foodie-Fi team were to create an exit survey shown to customers who wish to cancel their subscription, what questions would you include in the survey?**
+
 Solution:
 
 **Q5. What business levers could the Foodie-Fi team use to reduce the customer churn rate? How would you validate the effectiveness of your ideas?**
+
 Solution:
 
 ## Case Study #4: Data Bank
+
+### A. Customer Nodes Exploration
+### B. Customer Transactions
+### C. Data Allocation Challenge
+### D. Extra Challenge
+### E. Extension Request
+
 ## Case Study #5: Data Mart
+### A. Data Cleansing Steps
+### B. Data Exploration
+### C. Before & After Analysis
+### D. Bonus Question
+
 ## Case Study #6: Clique Bait
+### A. Enterprise Relationship Diagram
+### B. Digital Analysis
+### C. Product Funnel Analysis
+### D. Campaigns Analysis
+
 ## Case Study #7: Balanced Tree
+### A. High Level Sales Analysis
+### B. Transactional Analysis
+### C. Product Analysis
+### D. Reporting Challenge 
+### E. Bonus Challenge
+
 ## Case Study #8: Fresh Segments
+### A. Data Exploration and Cleansing
+### B. Interest Anlysis
+### C. Segment Analysis
+### D. Index Analysis
