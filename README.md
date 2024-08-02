@@ -13,7 +13,7 @@ Please find the solution links for the case studies below. Simply click on the l
   - [D. Pricing and Ratings](#d-pricing-and-ratings)
   - [E. Bonus Questions](#e-bonus-questions)
 - [Case Study #3: Foodie-Fi](#case-study-3-foodie-fi)
-  - [A. Customer Journey)(#a-customer-journey)
+  - [A. Customer Journey)](#a-customer-journey)
   - [B. Data Analysis Questions](#b-data-analysis)
   - [C. Challenge Payment Question](#c-challenge-payment-question)
   - [D. Outside The Box Questions](#d-outside-the-box-questions)
