@@ -2073,6 +2073,104 @@ For this multi-part challenge question - you have been requested to generate the
 - minimum, average and maximum values of the running balance for each customer
   
 Using all of the data available - how much data would have been required for each option on a monthly basis?**
+
+Solution:
+
+```sql
+WITH RECURSIVE recursive_dates AS (
+SELECT DISTINCT customer_id,
+       CAST("2020-01-31" AS DATE) AS end_date
+FROM customer_transactions 
+UNION ALL
+SELECT customer_id,
+       LAST_DAY(DATE_ADD(end_date, INTERVAL 1 MONTH)) AS end_date
+FROM recursive_dates 
+WHERE LAST_DAY(DATE_ADD(end_date, INTERVAL 1 MONTH)) <= (SELECT LAST_DAY(MAX(txn_date)) FROM customer_transactions)
+),
+transactions AS (
+SELECT customer_id,
+       LAST_DAY(txn_date) end_date,
+       txn_date,
+       SUM(CASE WHEN txn_type IN ('purchase', 'withdrawal') THEN -txn_amount
+                 ELSE txn_amount
+			END) transactions
+FROM customer_transactions 
+GROUP BY customer_id, txn_date
+),
+monthly_transactions AS (
+SELECT customer_id,
+       LAST_DAY(txn_date) end_date,
+       txn_date,
+       SUM(CASE WHEN txn_type IN ('purchase', 'withdrawal') THEN -txn_amount
+                 ELSE txn_amount
+			END) transactions
+FROM customer_transactions 
+GROUP BY customer_id, end_date
+),
+balance AS (
+SELECT r.customer_id,
+       r.end_date,
+       txn_date,
+	   COALESCE(transactions, 0) transactions,
+       SUM(transactions) OVER(PARTITION BY customer_id ORDER BY txn_date ROWS UNBOUNDED PRECEDING) running_balance
+FROM recursive_dates r
+LEFT JOIN transactions t ON r.customer_id = t.customer_id AND r.end_date = t.end_date
+ORDER BY r.customer_id,r.end_date
+),
+pre_balance AS (
+SELECT *,
+       LAG(running_balance,1) OVER(PARTITION BY customer_id ORDER BY end_date) pre_balance
+FROM balance
+),
+monthly_balance AS (
+SELECT r.customer_id,
+       r.end_date,
+	   COALESCE(transactions, 0) transactions,
+       SUM(transactions) OVER(PARTITION BY customer_id ORDER BY end_date ROWS UNBOUNDED PRECEDING) monthly_balance
+FROM recursive_dates r
+LEFT JOIN monthly_transactions m ON r.customer_id = m.customer_id AND r.end_date = m.end_date
+)
+SELECT b.customer_id,
+       b.end_date,
+       txn_date,
+       b.transactions,
+       (CASE WHEN txn_date IS NULL THEN pre_balance
+			 ELSE running_balance 
+		END) running_balance,
+        MIN(running_balance) OVER(PARTITION BY customer_id) min_balance,
+	    MAX(running_balance) OVER(PARTITION BY customer_id) max_balance,
+	    AVG(running_balance) OVER(PARTITION BY customer_id) avg_balance,
+        monthly_balance
+FROM pre_balance b
+LEFT JOIN monthly_balance m ON b.customer_id = m.customer_id AND b.end_date = m.end_date
+```
+
+Result: 
+|   customer_id | end_date   | txn_date   |   transactions |   running_balance |   min_balance |   max_balance |   avg_balance |   monthly_balance |
+|--------------:|:-----------|:-----------|---------------:|------------------:|--------------:|--------------:|--------------:|------------------:|
+|             1 | 2020-01-31 | 2020-01-02 |            312 |               312 |          -640 |           312 |     -151      |               312 |
+|             1 | 2020-02-29 | nan        |              0 |               312 |          -640 |           312 |     -151      |               312 |
+|             1 | 2020-03-31 | 2020-03-05 |           -612 |              -300 |          -640 |           312 |     -151      |              -640 |
+|             1 | 2020-03-31 | 2020-03-17 |            324 |                24 |          -640 |           312 |     -151      |              -640 |
+|             1 | 2020-03-31 | 2020-03-19 |           -664 |              -640 |          -640 |           312 |     -151      |              -640 |
+|             1 | 2020-04-30 | nan        |              0 |              -640 |          -640 |           312 |     -151      |              -640 |
+|             2 | 2020-01-31 | 2020-01-03 |            549 |               549 |           549 |           610 |      579.5    |               549 |
+|             2 | 2020-02-29 | nan        |              0 |               549 |           549 |           610 |      579.5    |               549 |
+|             2 | 2020-03-31 | 2020-03-24 |             61 |               610 |           549 |           610 |      579.5    |               610 |
+|             2 | 2020-04-30 | nan        |              0 |               610 |           549 |           610 |      579.5    |               610 |
+|             3 | 2020-01-31 | 2020-01-27 |            144 |               144 |         -1222 |           144 |     -732.4    |               144 |
+|             3 | 2020-02-29 | 2020-02-22 |           -965 |              -821 |         -1222 |           144 |     -732.4    |              -821 |
+|             3 | 2020-03-31 | 2020-03-05 |           -213 |             -1034 |         -1222 |           144 |     -732.4    |             -1222 |
+|             3 | 2020-03-31 | 2020-03-19 |           -188 |             -1222 |         -1222 |           144 |     -732.4    |             -1222 |
+|             3 | 2020-04-30 | 2020-04-12 |            493 |              -729 |         -1222 |           144 |     -732.4    |              -729 |
+|             4 | 2020-01-31 | 2020-01-07 |            458 |               458 |           458 |           848 |      653.667  |               848 |
+|             4 | 2020-01-31 | 2020-01-21 |            390 |               848 |           458 |           848 |      653.667  |               848 |
+|             4 | 2020-02-29 | nan        |              0 |               848 |           458 |           848 |      653.667  |               848 |
+|             4 | 2020-03-31 | 2020-03-25 |           -193 |               655 |           458 |           848 |      653.667  |               655 |
+|             4 | 2020-04-30 | nan        |              0 |               655 |           458 |           848 |      653.667  |               655 |
+|             5 | 2020-01-31 | 2020-01-15 |            974 |               974 |         -2413 |          1780 |     -120.2    |               954 |
+|             5 | 2020-01-31 | 2020-01-25 |            806 |              1780 |         -2413 |          1780 |     -120.2    |               954 |
+
 ### D. Extra Challenge
 Data Bank wants to try another option which is a bit more difficult to implement - they want to calculate data growth using an interest calculation, just like in a traditional savings account you might have with a bank.
 
@@ -2089,6 +2187,7 @@ Data Bank shares and new prospective customers who might want to bank with Data 
 **Q1. Using the outputs generated from the customer node questions, generate a few headline insights which Data Bank might use to market it’s world-leading security features to potential investors and customers.**
 
 **Q2. With the transaction analysis - prepare a 1 page presentation slide which contains all the relevant information about the various options for the data provisioning so the Data Bank management team can make an informed decision.**
+
 ## Case Study #5: Data Mart
 ### Introduction
 Data Mart is Danny’s latest venture and after running international operations for his online supermarket that specialises in fresh produce - Danny is asking for your support to analyse his sales performance.
@@ -2106,24 +2205,289 @@ Which platform, region, segment and customer types were the most impacted by thi
 What can we do about future introduction of similar sustainability updates to the business to minimise impact on sales?
 ### A. Data Cleansing Steps
 
+```sql
+-- In a single query, perform the following operations and generate a new table in the data_mart schema named clean_weekly_sales:
+DROP TABLE IF EXISTS clean_weekly_sales;
+CREATE TABLE clean_weekly_sales AS (
+WITH clean AS (
+SELECT CAST(CONCAT(substring_index(substring_index(week_date,'/',3 ),'/',-1), "-",
+				   substring_index(substring_index(week_date,'/',2 ),'/',-1), "-",
+				   substring_index(week_date,'/',1)) AS DATE) week_date,
+		region,
+        platform,
+        customer_type,
+		CASE WHEN RIGHT(segment,1) = '1' THEN 'Young Adults'
+             WHEN RIGHT(segment,1) = '2' THEN 'Middle Aged'
+             WHEN RIGHT(segment,1) IN ('3','4') THEN 'Retirees'
+		     ELSE "unknown"
+		END as age_band,
+        CASE WHEN LEFT(segment,1) = 'C' THEN 'Couples'
+             WHEN LEFT(segment,1) = 'F' THEN 'Families'
+             ELSE "unknown"
+		END as demographic,
+        transactions,
+        sales,
+        ROUND(sales/transactions, 2) avg_transactions
+FROM weekly_sales 
+)
+SELECT week_date,
+       WEEK(week_date) as week_number,
+       MONTH(week_date) as month_number,
+       YEAR(week_date) as calendar_year,
+       region,
+       platform,
+       customer_type,
+       age_band,
+       demographic,
+       transactions,
+       sales,
+       avg_transactions
+FROM clean
+)
+SELECT * FROM clean_weekly_sales;
+```
+
+Result:
+| week_date   |   week_number |   month_number |   calendar_year | region   | platform   | customer_type   | age_band     | demographic   |   transactions |    sales |   avg_transactions |
+|:------------|--------------:|---------------:|----------------:|:---------|:-----------|:----------------|:-------------|:--------------|---------------:|---------:|-------------------:|
+| 2020-08-31  |            35 |              8 |            2020 | ASIA     | Retail     | New             | Retirees     | Couples       |         120631 |  3656163 |              30.31 |
+| 2020-08-31  |            35 |              8 |            2020 | ASIA     | Retail     | New             | Young Adults | Families      |          31574 |   996575 |              31.56 |
+| 2020-08-31  |            35 |              8 |            2020 | USA      | Retail     | Guest           | unknown      | unknown       |         529151 | 16509610 |              31.2  |
+| 2020-08-31  |            35 |              8 |            2020 | EUROPE   | Retail     | New             | Young Adults | Couples       |           4517 |   141942 |              31.42 |
+| 2020-08-31  |            35 |              8 |            2020 | AFRICA   | Retail     | New             | Middle Aged  | Couples       |          58046 |  1758388 |              30.29 |
+| 2020-08-31  |            35 |              8 |            2020 | CANADA   | Shopify    | Existing        | Middle Aged  | Families      |           1336 |   243878 |             182.54 |
+| 2020-08-31  |            35 |              8 |            2020 | AFRICA   | Shopify    | Existing        | Retirees     | Families      |           2514 |   519502 |             206.64 |
+| 2020-08-31  |            35 |              8 |            2020 | ASIA     | Shopify    | Existing        | Young Adults | Families      |           2158 |   371417 |             172.11 |
+| 2020-08-31  |            35 |              8 |            2020 | AFRICA   | Shopify    | New             | Middle Aged  | Families      |            318 |    49557 |             155.84 |
+| 2020-08-31  |            35 |              8 |            2020 | AFRICA   | Retail     | New             | Retirees     | Couples       |         111032 |  3888162 |              35.02 |
+
 ### B. Data Exploration
 **Q1. What day of the week is used for each week_date value?**
+```sql
+SELECT DISTINCT(dayname(week_date)) AS week_day 
+FROM clean_weekly_sales
+```
+Result:
+
+| week_day   |
+|:-----------|
+| Monday     |
+
 
 **Q2. What range of week numbers are missing from the dataset?**
+```sql
+WITH RECURSIVE all_week AS 
+(
+SELECT 1 AS week_number
+UNION ALL 
+SELECT week_number + 1 AS week_number
+FROM all_week
+WHERE week_number < 52
+)
+SELECT week_number
+FROM all_week
+WHERE week_number NOT IN (SELECT week_number FROM clean_weekly_sales)
+```
+Result:
+
+|   week_number |
+|--------------:|
+|             1 |
+|             2 |
+|             3 |
+|             4 |
+|             5 |
+|             6 |
+|             7 |
+|             8 |
+|             9 |
+|            10 |
+|            11 |
+|            36 |
+|            37 |
+|            38 |
+|            39 |
+|            40 |
+|            41 |
+|            42 |
+|            43 |
+|            44 |
+|            45 |
+|            46 |
+|            47 |
+|            48 |
+|            49 |
+|            50 |
+|            51 |
+|            52 |
+
 
 **Q3. How many total transactions were there for each year in the dataset?**
+```sql
+SELECT calendar_year,
+       SUM(transactions) AS total_transactions
+FROM clean_weekly_sales
+GROUP BY calendar_year
+ORDER BY calendar_year
+```
+Result:
+|   calendar_year |   total_transactions |
+|----------------:|---------------------:|
+|            2018 |          346406460   |
+|            2019 |          365639285   |
+|            2020 |          375813651   |
 
 **Q4. What is the total sales for each region for each month?**
+```sql
+SELECT region, 
+       calendar_year,
+	   month_number,
+       SUM(sales) AS total_sales
+FROM clean_weekly_sales
+GROUP BY region,
+         month_number,
+         calendar_year
+ORDER BY region,
+         calendar_year,
+         month_number
+```
+Result:
+| region   |   calendar_year |   month_number |   total_sales |
+|:---------|----------------:|---------------:|--------------:|
+| AFRICA   |            2018 |              3 |     130542213 |
+| AFRICA   |            2018 |              4 |     650194751 |
+| AFRICA   |            2018 |              5 |     522814997 |
+| AFRICA   |            2018 |              6 |     519127094 |
+| AFRICA   |            2018 |              7 |     674135866 |
+| AFRICA   |            2018 |              8 |     539077371 |
+| AFRICA   |            2018 |              9 |     135084533 |
+| AFRICA   |            2019 |              3 |     141619349 |
+| AFRICA   |            2019 |              4 |     700447301 |
+| AFRICA   |            2019 |              5 |     553828220 |
+
 
 **Q5. What is the total count of transactions for each platform**
+```sql
+SELECT 
+  platform,
+  SUM(transactions) AS total_transactions
+FROM clean_weekly_sales
+GROUP BY platform
+```
+Result:
+
+| platform   |   total_transactions |
+|:-----------|---------------------:|
+| Retail     |           1081934227 |
+| Shopify    |              5925169 |
+
 
 **Q6. What is the percentage of sales for Retail vs Shopify for each month?**
+```sql
+SELECT 
+       calendar_year,
+       month_number,
+       SUM(CASE WHEN platform = 'Retail' THEN sales 
+				ELSE 0
+		   END) *100/SUM(sales) AS retail_sales_pct,
+	   SUM(CASE WHEN platform = 'Shopify' THEN sales 
+				ELSE 0
+		   END) *100/SUM(sales)  AS shopify_sales_pct
+FROM clean_weekly_sales
+GROUP BY month_number,
+         calendar_year
+ORDER BY calendar_year, month_number
+```
+Result:
+|   calendar_year |   month_number |   retail_sales_pct |   shopify_sales_pct |
+|----------------:|---------------:|-------------------:|--------------------:|
+|            2018 |              3 |            97.9185 |              2.0815 |
+|            2018 |              4 |            97.9259 |              2.0741 |
+|            2018 |              5 |            97.7279 |              2.2721 |
+|            2018 |              6 |            97.7555 |              2.2445 |
+|            2018 |              7 |            97.753  |              2.247  |
+|            2018 |              8 |            97.7063 |              2.2937 |
+|            2018 |              9 |            97.6786 |              2.3214 |
+|            2019 |              3 |            97.7066 |              2.2934 |
+|            2019 |              4 |            97.8002 |              2.1998 |
+|            2019 |              5 |            97.5249 |              2.4751 |
+
 
 **Q7. What is the percentage of sales by demographic for each year in the dataset?**
+```sql
+SELECT 
+       calendar_year,
+       demographic,
+       SUM(sales)*100/ (SELECT SUM(sales) FROM clean_weekly_sales) AS demographic_sales_pct
+FROM clean_weekly_sales
+GROUP BY calendar_year, 
+         demographic
+```
+Result:
+
+|   calendar_year | demographic   |   demographic_sales_pct |
+|----------------:|:--------------|------------------------:|
+|            2020 | Couples       |                  9.9391 |
+|            2020 | Families      |                 11.3253 |
+|            2020 | unknown       |                 13.3427 |
+|            2019 | unknown       |                 13.5797 |
+|            2019 | Couples       |                  9.2021 |
+|            2019 | Families      |                 10.9561 |
+|            2018 | unknown       |                 13.1786 |
+|            2018 | Couples       |                  8.3507 |
+|            2018 | Families      |                 10.1257 |
 
 **Q8. Which age_band and demographic values contribute the most to Retail sales?**
+```sql
+SELECT
+  age_band, 
+  demographic, 
+  sum(sales) total_sales 
+FROM
+  clean_weekly_sales 
+WHERE
+  platform = "Retail" 
+GROUP BY 
+  age_band, 
+  demographic;
+```
+Result:
+
+| age_band     | demographic   |   total_sales |
+|:-------------|:--------------|--------------:|
+| Retirees     | Couples       |    6370580014 |
+| Young Adults | Families      |    1770889293 |
+| unknown      | unknown       |   16067285533 |
+| Young Adults | Couples       |    2602922797 |
+| Middle Aged  | Couples       |    1854160330 |
+| Retirees     | Families      |    6634686916 |
+| Middle Aged  | Families      |    4354091554 |
+
 
 **Q9. Can we use the avg_transaction column to find the average transaction size for each year for Retail vs Shopify? If not - how would you calculate it instead?**
+```sql
+SELECT 
+  calendar_year, 
+  platform, 
+  SUM(sales)/ SUM(transactions) AS avg_transaction
+FROM
+  clean_weekly_sales 
+GROUP BY
+  calendar_year, 
+  platform 
+ORDER BY
+  calendar_year;
+```
+Result:
+
+|   calendar_year | platform   |   avg_transaction |
+|----------------:|:-----------|------------------:|
+|            2018 | Retail     |           36.5626 |
+|            2018 | Shopify    |          192.481  |
+|            2019 | Retail     |           36.8335 |
+|            2019 | Shopify    |          183.361  |
+|            2020 | Retail     |           36.5566 |
+|            2020 | Shopify    |          179.033  |
 
 ### C. Before & After Analysis
 This technique is usually used when we inspect an important event and want to inspect the impact before and after a certain point in time.
@@ -2135,10 +2499,50 @@ We would include all week_date values for 2020-06-15 as the start of the period 
 Using this analysis approach - answer the following questions:
 
 **Q1. What is the total sales for the 4 weeks before and after 2020-06-15? What is the growth or reduction rate in actual values and percentage of sales?**
+```sql 
+WITH sales AS (
+SELECT 
+       SUM(CASE WHEN week_date BETWEEN DATE_ADD("2020-06-15", INTERVAL -4 WEEK) AND "2020-06-15" THEN sales ELSE 0 END) before_sales,
+       SUM(CASE WHEN week_date BETWEEN "2020-06-15" AND DATE_ADD("2020-06-15", INTERVAL 4 WEEK) THEN sales ELSE 0 END) after_sales
+FROM clean_weekly_sales
+)
+SELECT before_sales,
+       after_sales,
+       after_sales - before_sales as actual_growth, 
+       ROUND(100 *(after_sales - before_sales)/ before_sales, 2) as percent_growth 
+FROM sales
+```
+Result:
+
+|   before_sales |   after_sales |   actual_growth |   percent_growth |
+|---------------:|--------------:|----------------:|-----------------:|
+|     2.9159e+09 |   2.90493e+09 |    -1.09731e+07 |            -0.38 |
+
 
 **Q2. What about the entire 12 weeks before and after?**
+```sql
+WITH sales AS (
+SELECT 
+       SUM(CASE WHEN week_date BETWEEN DATE_ADD("2020-06-15", INTERVAL -12 WEEK) AND "2020-06-15" THEN sales ELSE 0 END) before_sales,
+       SUM(CASE WHEN week_date BETWEEN "2020-06-15" AND DATE_ADD("2020-06-15", INTERVAL 12 WEEK) THEN sales ELSE 0 END) after_sales
+FROM clean_weekly_sales
+)
+SELECT before_sales,
+       after_sales,
+       after_sales - before_sales as actual_growth, 
+       ROUND(100 *(after_sales - before_sales)/ before_sales, 2) as percent_growth 
+FROM sales
+```
+Result: 
 
-**Q3. How do the sale metrics for these 2 periods before and after compare with the previous years in 2018 and 2019?**
+|   before_sales |   after_sales |   actual_growth |   percent_growth |
+|---------------:|--------------:|----------------:|-----------------:|
+|    7696298495	 |   6973947753	 |   -722350742	   |           -9.39  |
+
+**Q3. How do the sale metrics for these 2 periods before and after compare with the previous years in 2018 and 2019?** 
+
+Solution: 
+
 ### D. Bonus Question
 Which areas of the business have the highest negative impact in sales metrics performance in 2020 for the 12 week before and after period?
 
@@ -2147,7 +2551,123 @@ Which areas of the business have the highest negative impact in sales metrics pe
 - age_band
 - demographic
 - customer_type
-Do you have any further recommendations for Danny’s team at Data Mart or any interesting insights based off this analysis?
+**Do you have any further recommendations for Danny’s team at Data Mart or any interesting insights based off this analysis?**
+
+```sql
+-- region
+WITH sales AS (
+SELECT region,
+       SUM(CASE WHEN week_date BETWEEN DATE_ADD("2020-06-15", INTERVAL -12 WEEK) AND "2020-06-15" THEN sales ELSE 0 END) before_sales,
+       SUM(CASE WHEN week_date BETWEEN "2020-06-15" AND DATE_ADD("2020-06-15", INTERVAL 12 WEEK) THEN sales ELSE 0 END) after_sales
+FROM clean_weekly_sales
+GROUP BY region
+)
+SELECT region,
+       before_sales,
+       after_sales,
+       after_sales - before_sales as actual_growth, 
+       ROUND(100 *(after_sales - before_sales)/ before_sales, 2) as percent_growth 
+FROM sales
+```
+| region        |   before_sales |   after_sales |   actual_growth |   percent_growth |
+|:--------------|---------------:|--------------:|----------------:|-----------------:|
+| ASIA          |     1767003725 |    1583807621 |      -183196104 |           -10.37 |
+| USA           |      731431645 |     666198715 |       -65232930 |            -8.92 |
+| EUROPE        |      118115153 |     114038959 |        -4076194 |            -3.45 |
+| AFRICA        |     1847459695 |    1700390294 |      -147069401 |            -7.96 |
+| CANADA        |      461233687 |     418264441 |       -42969246 |            -9.32 |
+| OCEANIA       |     2540728923 |    2282795690 |      -257933233 |           -10.15 |
+| SOUTH AMERICA |      230325667 |     208452033 |       -21873634 |            -9.5  |
+
+```sql
+-- platform 
+WITH sales AS (
+SELECT platform,
+       SUM(CASE WHEN week_date BETWEEN DATE_ADD("2020-06-15", INTERVAL -12 WEEK) AND "2020-06-15" THEN sales ELSE 0 END) before_sales,
+       SUM(CASE WHEN week_date BETWEEN "2020-06-15" AND DATE_ADD("2020-06-15", INTERVAL 12 WEEK) THEN sales ELSE 0 END) after_sales
+FROM clean_weekly_sales
+GROUP BY platform
+)
+SELECT platform
+       before_sales,
+       after_sales,
+       after_sales - before_sales as actual_growth, 
+       ROUND(100 *(after_sales - before_sales)/ before_sales, 2) as percent_growth 
+FROM sales
+```
+| before_sales   |   after_sales |   actual_growth |   percent_growth |
+|:---------------|--------------:|----------------:|-----------------:|
+| Retail         |    6738777279 |      -718830501 |            -9.64 |
+| Shopify        |     235170474 |        -3520241 |            -1.47 |
+
+```sql
+-- age_band
+WITH sales AS (
+SELECT age_band,
+       SUM(CASE WHEN week_date BETWEEN DATE_ADD("2020-06-15", INTERVAL -12 WEEK) AND "2020-06-15" THEN sales ELSE 0 END) before_sales,
+       SUM(CASE WHEN week_date BETWEEN "2020-06-15" AND DATE_ADD("2020-06-15", INTERVAL 12 WEEK) THEN sales ELSE 0 END) after_sales
+FROM clean_weekly_sales
+GROUP BY age_band
+)
+SELECT age_band,
+       before_sales,
+       after_sales,
+       after_sales - before_sales as actual_growth, 
+       ROUND(100 *(after_sales - before_sales)/ before_sales, 2) as percent_growth 
+FROM sales
+```
+| age_band     |   before_sales |   after_sales |   actual_growth |   percent_growth |
+|:-------------|---------------:|--------------:|----------------:|-----------------:|
+| Retirees     |     2589271613 |    2365714994 |      -223556619 |            -8.63 |
+| Young Adults |      866960357 |     794417968 |       -72542389 |            -8.37 |
+| unknown      |     2981006335 |    2671961443 |      -309044892 |           -10.37 |
+| Middle Aged  |     1259060190 |    1141853348 |      -117206842 |            -9.31 |
+
+```sql
+-- demographic
+WITH sales AS (
+SELECT demographic,
+       SUM(CASE WHEN week_date BETWEEN DATE_ADD("2020-06-15", INTERVAL -12 WEEK) AND "2020-06-15" THEN sales ELSE 0 END) before_sales,
+       SUM(CASE WHEN week_date BETWEEN "2020-06-15" AND DATE_ADD("2020-06-15", INTERVAL 12 WEEK) THEN sales ELSE 0 END) after_sales
+FROM clean_weekly_sales
+GROUP BY demographic
+)
+SELECT demographic,
+       before_sales,
+       after_sales,
+       after_sales - before_sales as actual_growth, 
+       ROUND(100 *(after_sales - before_sales)/ before_sales, 2) as percent_growth 
+FROM sales
+```
+| demographic   |   before_sales |   after_sales |   actual_growth |   percent_growth |
+|:--------------|---------------:|--------------:|----------------:|-----------------:|
+| Couples       |     2197905564 |    2015977285 |      -181928279 |            -8.28 |
+| Families      |     2517386596 |    2286009025 |      -231377571 |            -9.19 |
+| unknown       |     2981006335 |    2671961443 |      -309044892 |           -10.37 |
+
+```sql
+-- customer_type
+WITH sales AS (
+SELECT customer_type,
+       SUM(CASE WHEN week_date BETWEEN DATE_ADD("2020-06-15", INTERVAL -12 WEEK) AND "2020-06-15" THEN sales ELSE 0 END) before_sales,
+       SUM(CASE WHEN week_date BETWEEN "2020-06-15" AND DATE_ADD("2020-06-15", INTERVAL 12 WEEK) THEN sales ELSE 0 END) after_sales
+FROM clean_weekly_sales
+GROUP BY customer_type
+)
+SELECT customer_type,
+       before_sales,
+       after_sales,
+       after_sales - before_sales as actual_growth, 
+       ROUND(100 *(after_sales - before_sales)/ before_sales, 2) as percent_growth 
+FROM sales
+```
+| customer_type   |   before_sales |   after_sales |   actual_growth |   percent_growth |
+|:----------------|---------------:|--------------:|----------------:|-----------------:|
+| New             |      931238185 |     871470664 |       -59767521 |            -6.42 |
+| Guest           |     2777319056 |    2496233635 |      -281085421 |           -10.12 |
+| Existing        |     3987741254 |    3606243454 |      -381497800 |            -9.57 |
+
+Solution: 
 
 ## Case Study #6: Clique Bait
 ### Introduction
@@ -2231,9 +2751,12 @@ Danny, the CEO of this trendy fashion company has asked you to assist the team�
 
 **Q1. What was the total quantity sold for all products?**
 
+
 **Q2. What is the total generated revenue for all products before discounts?**
 
+
 **Q3. What was the total discount amount for all products?**
+
 
 ### B. Transactional Analysis
 
