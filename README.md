@@ -1599,6 +1599,130 @@ Result:
 |   num_downgrade |
 |----------------:|
 |               0 |
+
+### C. Challenge Payment Question
+The Foodie-Fi team wants you to create a new payments table for the year 2020 that includes amounts paid by each customer in the subscriptions table with the following requirements:
+
+monthly payments always occur on the same day of month as the original start_date of any monthly paid plan
+upgrades from basic to monthly or pro plans are reduced by the current paid amount in that month and start immediately
+upgrades from pro monthly to pro annual are paid at the end of the current billing period and also starts at the end of the month period
+once a customer churns they will no longer make payments
+
+Solution:
+```sql
+DROP TABLE IF EXISTS payments;
+CREATE TABLE payments AS (
+WITH RECURSIVE payment_dates AS (
+SELECT s.customer_id,
+       s.plan_id,
+       p.plan_name,
+       s.start_date AS payment_date, 
+       CASE WHEN LEAD(s.start_date) OVER(PARTITION BY s.customer_id ORDER BY s.start_date) IS NULL THEN '2020-12-31'
+			ELSE DATE_ADD( start_date, INTERVAL TIMESTAMPDIFF(MONTH,start_date,LEAD(start_date) OVER(PARTITION BY s.customer_id ORDER BY start_date)) MONTH)
+            END AS last_date,
+       p.price AS amount
+FROM subscriptions s
+JOIN plans p ON s.plan_id = p.plan_id
+WHERE p.plan_name NOT IN ('trial','churn') AND YEAR(start_date) = 2020
+UNION ALL 
+SELECT customer_id,
+       plan_id,
+       plan_name,
+       DATE_ADD(payment_date, INTERVAL 1 MONTH) payment_date,
+       last_date,
+       amount
+FROM payment_dates
+WHERE DATE_ADD(payment_date, INTERVAL 1 MONTH) < last_date AND plan_name NOT IN ( 'pro annual')
+
+),
+upgrade_plan AS (
+SELECT customer_id,
+	   plan_id,
+       LAG(plan_id,1) OVER(PARTITION BY customer_id ORDER BY payment_date) pre_plan,
+       plan_name,
+       payment_date,
+       last_date,
+       amount,
+       LAG(amount,1) OVER (PARTITION BY customer_id ORDER BY payment_date) pre_amount
+FROM payment_dates
+)
+SELECT customer_id,
+	   plan_id,
+       plan_name,
+       payment_date,       
+       CASE WHEN plan_name IN ('pro monthly', 'pro annual') AND pre_plan = 1 THEN amount - pre_amount
+            ELSE amount
+		END AS amount,
+        RANK() OVER(PARTITION BY customer_id ORDER BY payment_date) payment_order
+FROM upgrade_plan
+WHERE plan_name != 'churn'
+ORDER BY customer_id
+);
+SELECT * FROM payments
+```
+Result:
+|   customer_id |   plan_id | plan_name     | payment_date   |   amount |   payment_order |
+|--------------:|----------:|:--------------|:---------------|---------:|----------------:|
+|             1 |         1 | basic monthly | 2020-08-08     |      9.9 |               1 |
+|             1 |         1 | basic monthly | 2020-09-08     |      9.9 |               2 |
+|             1 |         1 | basic monthly | 2020-10-08     |      9.9 |               3 |
+|             1 |         1 | basic monthly | 2020-11-08     |      9.9 |               4 |
+|             1 |         1 | basic monthly | 2020-12-08     |      9.9 |               5 |
+|             2 |         3 | pro annual    | 2020-09-27     |      199 |               1 |
+|             3 |         1 | basic monthly | 2020-01-20     |      9.9 |               1 |
+|             3 |         1 | basic monthly | 2020-02-20     |      9.9 |               2 |
+|             3 |         1 | basic monthly | 2020-03-20     |      9.9 |               3 |
+|             3 |         1 | basic monthly | 2020-04-20     |      9.9 |               4 |
+
+### D. Outside The Box Questions
+The following are open ended questions which might be asked during a technical interview for this case study - there are no right or wrong answers, but answers that make sense from both a technical and a business perspective make an amazing impression!
+
+**Q1. How would you calculate the rate of growth for Foodie-Fi?**
+```sql
+WITH monthlyRevenue AS (
+  SELECT 
+    MONTH(payment_date) AS months,
+    SUM(amount) AS revenue
+  FROM payments
+  GROUP BY MONTH(payment_date)
+)
+SELECT 
+  months,
+  revenue,
+  LAG(revenue) OVER(ORDER BY months) pre_revenue,
+  (revenue-LAG(revenue) OVER(ORDER BY months))/revenue AS revenue_growth
+FROM monthlyRevenue;
+```
+Result: 
+|   months |   revenue |   pre_revenue |   revenue_growth |
+|---------:|----------:|--------------:|-----------------:|
+|        1 |    1272.1 |           nan |              nan |
+|        2 |      2753 |        1272.1 |         0.537922 |
+|        3 |    4184.3 |          2753 |         0.342064 |
+|        4 |    5785.1 |        4184.3 |         0.276711 |
+|        5 |    7097.2 |        5785.1 |         0.184876 |
+|        6 |    8548.8 |        7097.2 |         0.169802 |
+|        7 |     10180 |        8548.8 |         0.160236 |
+|        8 |   11950.6 |         10180 |         0.14816  |
+|        9 |   13114.1 |       11950.6 |         0.088721 |
+|       10 |   15312.7 |       13114.1 |         0.14358  |
+|       11 |     13610 |       15312.7 |        -0.125107 |
+|       12 |   14712.9 |         13610 |         0.074961 |
+
+**Q2. What key metrics would you recommend Foodie-Fi management to track over time to assess performance of their overall business?**
+Solution:
+Key metrics: revenue growth by monthly, churn rate, customer growth
+**Q3. What are some key customer journeys or experiences that you would analyse further to improve customer retention?**
+Solution:
+- Customers who downgraded their plan
+- Customers who upgraded from basic monthly to pro monthly or pro annual
+- Customers who cancelled the subscription
+
+**Q4. If the Foodie-Fi team were to create an exit survey shown to customers who wish to cancel their subscription, what questions would you include in the survey?**
+Solution:
+**Q5. What business levers could the Foodie-Fi team use to reduce the customer churn rate? How would you validate the effectiveness of your ideas?**
+Solution:
+
 ## Case Study #4: Data Bank
 ## Case Study #5: Data Mart
 ## Case Study #6: Clique Bait
