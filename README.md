@@ -27,7 +27,7 @@ Please find the solution links for the case studies below. Simply click on the l
   - [A. Data Cleansing Steps](#a-data-cleansing-steps)
   - [B. Data Exploration](#b-data-exploration)
   - [C. Before & After Analysis](#c-before-&after-analysis)
-  - [D. Bonus Question](#d-bonus-questions)
+  - [D. Bonus Question](#d-bonus-question)
 - [Case Study #6: Clique Bait](#case-study-6-clique-bait)
   - [A. Enterprise Relationship Diagram](#a-enterprise-relationship-diagram)
   - [B. Digital Analysis](#b-digital-analysis)
