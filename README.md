@@ -1000,21 +1000,27 @@ Result:
 
 **Q6: What is the total quantity of each ingredient used in all delivered pizzas sorted by most frequent first?**
 ```sql
-DROP TABLE IF EXISTS quantity_extra;CREATE temporary TABLE quantity_extra AS(
+DROP TABLE IF EXISTS quantity_extra;
+CREATE temporary TABLE quantity_extra AS(
 SELECT Trim(j.extra) AS extra,Count(extra) AS number_extra
 FROM customer_orders_pre c
 JOIN runner_orders_cleaned r1 ON c.order_id = r1.order_id
 JOIN json_table(trim(REPLACE(json_array(c.extras),',','","')),'$[*]' columns(extra VARCHAR(5) path '$')) j
 WHERE cancellation IS NULL AND extras IS NOT NULL
 GROUP BY j.extra
-);DROP TABLE IF EXISTS quantity_exclude;CREATE temporary TABLE quantity_exclude AS
+);
+
+DROP TABLE IF EXISTS quantity_exclude;
+CREATE temporary TABLE quantity_exclude AS
 (SELECT Trim(j1.exclusion) AS exclusion, Count(exclusion) AS number_exclude
 FROM customer_orders_pre c
 JOIN runner_orders_cleaned r1 ON c.order_id = r1.order_id
 JOIN json_table(trim(REPLACE(json_array(c.exclusions),',','","')),'$[*]' columns(exclusion VARCHAR(5) path '$')) j1
 WHERE cancellation IS NULL AND exclusions IS NOT NULL
 GROUP BY j1.exclusion
-);SELECT topping ,(Count(c.pizza_id) + Ifnull(number_extra,'') - Ifnull(number_exclude,'')) AS number_topping
+);
+
+SELECT topping ,(Count(c.pizza_id) + Ifnull(number_extra,'') - Ifnull(number_exclude,'')) AS number_topping
 FROM customer_orders_pre c
 JOIN pizza_recipes_cleaned p1 ON c.pizza_id = p1.pizza_id
 JOIN runner_orders_cleaned r1 ON c.order_id = r1.order_id
