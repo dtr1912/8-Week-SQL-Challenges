@@ -1784,11 +1784,114 @@ The management team at Data Bank want to increase their total customer base - bu
 
 This case study is all about calculating metrics, growth and helping the business analyse their data in a smart way to better forecast and plan for their future developments!
 ### A. Customer Nodes Exploration
-### B. Customer Transactions
-### C. Data Allocation Challenge
-### D. Extra Challenge
-### E. Extension Request
+**Q1. How many unique nodes are there on the Data Bank system? There are 5 unique nodes on the Data Bank system**
+```sql
+SELECT COUNT(DISTINCT node_id) 'Number of node'
+FROM  customer_nodes
+```
+Result:
+**Q2. What is the number of nodes per region?**
+```sql
+SELECT region_name, 
+       COUNT(node_id) as 'Number of nodes per region'
+FROM customer_nodes n
+JOIN regions r ON n.region_id=r.region_id
+GROUP BY n.region_id
+```
+Result:
+**Q3. How many customers are allocated to each region?**
+```sql
+SELECT region_name, 
+       COUNT(DISTINCT customer_id)  'Number of customers each region'
+FROM customer_nodes n
+JOIN regions r ON n.region_id = r.region_id
+GROUP BY n.region_id
+```
+Result:
 
+**Q4. How many days on average are customers reallocated to a different node?**
+```sql
+SELECT ROUND(AVG(DATEDIFF(end_date,start_date))) avg_reallocation_days
+FROM customer_nodes 
+WHERE end_date != '9999-12-31'
+```
+Result:
+On average, customers are reallocated to a different node every 15 days.
+
+**Q5. What is the median, 80th and 95th percentile for this same reallocation days metric for each region?**
+```sql
+WITH  temp_cte AS (
+SELECT *, 
+       SUM(DATEDIFF(end_date, start_date)) day_diff, 
+	   NTILE(100) OVER(PARTITION BY region_id ORDER BY SUM(DATEDIFF(end_date, start_date))) percentile 
+FROM customer_nodes 
+WHERE end_date != '9999-12-31' 
+GROUP BY customer_id, 
+         region_id, 
+         node_id, 
+         start_date, 
+         end_date
+) 
+SELECT
+  region_name, 
+  MAX(IF(percentile = 50, day_diff, NULL)) AS median, 
+  MAX(IF(percentile = 80, day_diff, NULL)) AS 80_percentile, 
+  MAX(IF(percentile = 95, day_diff, NULL)) AS 95_percentile
+FROM
+(
+    SELECT  
+      region_id, 
+      day_diff, 
+      percentile 
+    FROM
+      temp_cte 
+    WHERE 
+      percentile IN (50, 80, 95) 
+    GROUP BY 
+      region_id, 
+      day_diff, 
+      percentile
+) temp 
+LEFT JOIN regions ON temp.region_id = regions.region_id 
+GROUP BY region_name;
+```
+Result:
+
+### B. Customer Transactions
+**Q1. What is the unique count and total amount for each transaction type?**
+**Q2. What is the average total historical deposit counts and amounts for all customers?**
+**Q3. For each month - how many Data Bank customers make more than 1 deposit and either 1 purchase or 1 withdrawal in a single month?**
+**Q4. What is the closing balance for each customer at the end of the month?**
+**Q5. What is the percentage of customers who increase their closing balance by more than 5%?**
+### C. Data Allocation Challenge
+ To test out a few different hypotheses - the Data Bank team wants to run an experiment where different groups of customers would be allocated data using 3 different options:
+ 
+- Option 1: data is allocated based off the amount of money at the end of the previous month
+- Option 2: data is allocated on the average amount of money kept in the account in the previous 30 days
+- Option 3: data is updated real-time
+For this multi-part challenge question - you have been requested to generate the following data elements to help the Data Bank team estimate how much data will need to be provisioned for each option:
+
+- running customer balance column that includes the impact each transaction
+- customer balance at the end of each month
+- minimum, average and maximum values of the running balance for each customer
+  
+Using all of the data available - how much data would have been required for each option on a monthly basis?**
+### D. Extra Challenge
+Data Bank wants to try another option which is a bit more difficult to implement - they want to calculate data growth using an interest calculation, just like in a traditional savings account you might have with a bank.
+
+If the annual interest rate is set at 6% and the Data Bank team wants to reward its customers by increasing their data allocation based off the interest calculated on a daily basis at the end of each day, how much data would be required for this option on a monthly basis?
+
+Special notes:
+- Data Bank wants an initial calculation which does not allow for compounding interest, however they may also be interested in a daily compounding interest calculation so you can try to perform this calculation if you have the stamina!
+
+### E. Extension Request
+The Data Bank team wants you to use the outputs generated from the above sections to create a quick Powerpoint presentation which will be used as marketing materials for both external investors who might want to buy 
+
+Data Bank shares and new prospective customers who might want to bank with Data Bank.
+
+**Q1. Using the outputs generated from the customer node questions, generate a few headline insights which Data Bank might use to market it’s world-leading security features to potential investors and customers.**
+
+**Q2. With the transaction analysis - prepare a 1 page presentation slide which contains all the relevant information about the various options for the data provisioning so the Data Bank management team can make an informed decision.**
 ## Case Study #5: Data Mart
 ### Introduction
 Data Mart is Danny’s latest venture and after running international operations for his online supermarket that specialises in fresh produce - Danny is asking for your support to analyse his sales performance.
@@ -1800,12 +1903,43 @@ Danny needs your help to quantify the impact of this change on the sales perform
 The key business question he wants you to help him answer are the following:
 
 What was the quantifiable impact of the changes introduced in June 2020?
+
 Which platform, region, segment and customer types were the most impacted by this change?
+
 What can we do about future introduction of similar sustainability updates to the business to minimise impact on sales?
 ### A. Data Cleansing Steps
+
 ### B. Data Exploration
+**Q1. What day of the week is used for each week_date value?**
+**Q2. What range of week numbers are missing from the dataset?**
+**Q3. How many total transactions were there for each year in the dataset?**
+**Q4. What is the total sales for each region for each month?**
+**Q5. What is the total count of transactions for each platform**
+**Q6. What is the percentage of sales for Retail vs Shopify for each month?**
+**Q7. What is the percentage of sales by demographic for each year in the dataset?**
+**Q8. Which age_band and demographic values contribute the most to Retail sales?**
+**Q9. Can we use the avg_transaction column to find the average transaction size for each year for Retail vs Shopify? If not - how would you calculate it instead?**
 ### C. Before & After Analysis
+This technique is usually used when we inspect an important event and want to inspect the impact before and after a certain point in time.
+
+Taking the week_date value of 2020-06-15 as the baseline week where the Data Mart sustainable packaging changes came into effect.
+
+We would include all week_date values for 2020-06-15 as the start of the period after the change and the previous week_date values would be before
+
+Using this analysis approach - answer the following questions:
+
+**Q1. What is the total sales for the 4 weeks before and after 2020-06-15? What is the growth or reduction rate in actual values and percentage of sales?**
+**Q2. What about the entire 12 weeks before and after?**
+**Q3. How do the sale metrics for these 2 periods before and after compare with the previous years in 2018 and 2019?**
 ### D. Bonus Question
+Which areas of the business have the highest negative impact in sales metrics performance in 2020 for the 12 week before and after period?
+
+- region
+- platform
+- age_band
+- demographic
+- customer_type
+Do you have any further recommendations for Danny’s team at Data Mart or any interesting insights based off this analysis?
 
 ## Case Study #6: Clique Bait
 ### Introduction
@@ -1813,9 +1947,57 @@ Clique Bait is not like your regular online seafood store - the founder and CEO 
 
 In this case study - you are required to support Danny’s vision and analyse his dataset and come up with creative solutions to calculate funnel fallout rates for the Clique Bait online store.
 ### A. Enterprise Relationship Diagram
+
 ### B. Digital Analysis
+Using the available datasets - answer the following questions using a single query for each one:
+
+Q1. How many users are there?
+Q2. How many cookies does each user have on average?
+Q3. What is the unique number of visits by all users per month?
+Q4. What is the number of events for each event type?
+Q5. What is the percentage of visits which have a purchase event?
+Q6. What is the percentage of visits which view the checkout page but do not have a purchase event?
+Q7. What are the top 3 pages by number of views?
+Q8. What is the number of views and cart adds for each product category?
+Q9. What are the top 3 products by purchases?
+
 ### C. Product Funnel Analysis
+Using a single SQL query - create a new output table which has the following details:
+
+- How many times was each product viewed?
+- How many times was each product added to cart?
+- How many times was each product added to a cart but not purchased (abandoned)?
+- How many times was each product purchased?
+Additionally, create another table which further aggregates the data for the above points but this time for each product category instead of individual products.
+
+Use your 2 new output tables - answer the following questions:
+
+**Q1. Which product had the most views, cart adds and purchases?**
+**Q2. Which product was most likely to be abandoned?**
+**Q3. Which product had the highest view to purchase percentage?**
+**Q4. What is the average conversion rate from view to cart add?**
+**Q5. What is the average conversion rate from cart add to purchase?**
 ### D. Campaigns Analysis
+Generate a table that has 1 single row for every unique visit_id record and has the following columns:
+
+- user_id
+- visit_id
+- visit_start_time: the earliest event_time for each visit
+- page_views: count of page views for each visit
+- cart_adds: count of product cart add events for each visit
+- purchase: 1/0 flag if a purchase event exists for each visit
+- campaign_name: map the visit to a campaign if the visit_start_time falls between the start_date and end_date
+- impression: count of ad impressions for each visit
+- click: count of ad clicks for each visit
+- **(Optional column)** cart_products: a comma separated text value with products added to the cart sorted by the order they were added to the cart (hint: use the sequence_number)
+Use the subsequent dataset to generate at least 5 insights for the Clique Bait team - bonus: prepare a single A4 infographic that the team can use for their management reporting sessions, be sure to emphasise the most important points from your findings.
+
+Some ideas you might want to investigate further include:
+
+- Identifying users who have received impressions during each campaign period and comparing each metric with other users who did not have an impression event
+- Does clicking on an impression lead to higher purchase rates?
+- What is the uplift in purchase rate when comparing users who click on a campaign impression versus users who do not receive an impression? What if we compare them with users who just an impression but do not click
+- What metrics can you use to quantify the success or failure of each campaign compared to eachother?
 
 ## Case Study #7: Balanced Tree
 ### Introduction
@@ -1824,10 +2006,43 @@ Balanced Tree Clothing Company prides themselves on providing an optimised range
 Danny, the CEO of this trendy fashion company has asked you to assist the team’s merchandising teams analyse their sales performance and generate a basic financial report to share with the wider business.
 
 ### A. High Level Sales Analysis
+
+**Q1. What was the total quantity sold for all products?**
+**Q2. What is the total generated revenue for all products before discounts?**
+**Q3. What was the total discount amount for all products?**
 ### B. Transactional Analysis
+
+**Q1. How many unique transactions were there?**
+**Q2. What is the average unique products purchased in each transaction?**
+**Q3. What are the 25th, 50th and 75th percentile values for the revenue per transaction?**
+**Q4. What is the average discount value per transaction?**
+**Q5. What is the percentage split of all transactions for members vs non-members?**
+**Q6. What is the average revenue for member transactions and non-member transactions?**
+
 ### C. Product Analysis
+**Q1. What are the top 3 products by total revenue before discount?**
+**Q2. What is the total quantity, revenue and discount for each segment?**
+**Q3. What is the top selling product for each segment?**
+**Q4. What is the total quantity, revenue and discount for each category?**
+**Q5. What is the top selling product for each category?**
+**Q6. What is the percentage split of revenue by product for each segment?**
+**Q7. What is the percentage split of revenue by segment for each category?**
+**Q8. What is the percentage split of total revenue by category?**
+**Q9. What is the total transaction “penetration” for each product? (hint: penetration = number of transactions where at least 1 quantity of a product was purchased divided by total number of transactions)**
+**Q10. What is the most common combination of at least 1 quantity of any 3 products in a 1 single transaction?**
 ### D. Reporting Challenge 
+Write a single SQL script that combines all of the previous questions into a scheduled report that the Balanced Tree team can run at the beginning of each month to calculate the previous month’s values.
+
+Imagine that the Chief Financial Officer (which is also Danny) has asked for all of these questions at the end of every month.
+
+He first wants you to generate the data for January only - but then he also wants you to demonstrate that you can easily run the samne analysis for February without many changes (if at all).
+
+Feel free to split up your final outputs into as many tables as you need - but be sure to explicitly reference which table outputs relate to which question for full marks :)
+
 ### E. Bonus Challenge
+Use a single SQL query to transform the product_hierarchy and product_prices datasets to the product_details table.
+
+Hint: you may want to consider using a recursive CTE to solve this problem!
 
 ## Case Study #8: Fresh Segments
 ### Introduction
@@ -1840,6 +2055,35 @@ In particular - the composition and rankings for different interests are provide
 Danny has asked for your assistance to analyse aggregated metrics for an example client and provide some high level insights about the customer list and their interests.
 
 ### A. Data Exploration and Cleansing
+**Q1. Update the fresh_segments.interest_metrics table by modifying the month_year column to be a date data type with the start of the month**
+**Q2. What is count of records in the fresh_segments.interest_metrics for each month_year value sorted in chronological order (earliest to latest) with the null values appearing first?**
+**Q3. What do you think we should do with these null values in the fresh_segments.interest_metrics**
+**Q4. How many interest_id values exist in the fresh_segments.interest_metrics table but not in the fresh_segments.interest_map table? What about the other way around?**
+**Q5. Summarise the id values in the fresh_segments.interest_map by its total record count in this table**
+**Q6. What sort of table join should we perform for our analysis and why? Check your logic by checking the rows where interest_id = 21246 in your joined output and include all columns from fresh_segments.interest_metrics and all columns from fresh_segments.interest_map except from the id column.**
+**Q7. Are there any records in your joined table where the month_year value is before the created_at value from the fresh_segments.interest_map table? Do you think these values are valid and why?**
+
 ### B. Interest Anlysis
+**Q1. Which interests have been present in all month_year dates in our dataset?**
+**Q2. Using this same total_months measure - calculate the cumulative percentage of all records starting at 14 months - which total_months value passes the 90% cumulative percentage value?**
+**Q3. If we were to remove all interest_id values which are lower than the total_months value we found in the previous question - how many total data points would we be removing?**
+**Q4. Does this decision make sense to remove these data points from a business perspective? Use an example where there are all 14 months present to a removed interest example for your arguments - think about what it means to have less months present from a segment perspective.**
+**Q5. After removing these interests - how many unique interests are there for each month?**
+
 ### C. Segment Analysis
+**Q1. Using our filtered dataset by removing the interests with less than 6 months worth of data, which are the top 10 and bottom 10 interests which have the largest composition values in any month_year? Only use the maximum composition value for each interest but you must keep the corresponding month_year**
+**Q2. Which 5 interests had the lowest average ranking value?**
+**Q3. Which 5 interests had the largest standard deviation in their percentile_ranking value?**
+**Q4. For the 5 interests found in the previous question - what was minimum and maximum percentile_ranking values for each interest and its corresponding year_month value? Can you describe what is happening for these 5 interests?**
+**Q5. How would you describe our customers in this segment based off their composition and ranking values? What sort of products or services should we show to these customers and what should we avoid?**
+
 ### D. Index Analysis
+The index_value is a measure which can be used to reverse calculate the average composition for Fresh Segments’ clients.
+
+Average composition can be calculated by dividing the composition column by the index_value column rounded to 2 decimal places.
+
+**Q1. What is the top 10 interests by the average composition for each month?**
+**Q2. For all of these top 10 interests - which interest appears the most often?**
+**Q3. What is the average of the average composition for the top 10 interests for each month?**
+**Q4. What is the 3 month rolling average of the max average composition value from September 2018 to August 2019 and include the previous top ranking interests in the same output shown below.**
+**Q5. Provide a possible reason why the max average composition might change from month to month? Could it signal something is not quite right with the overall business model for Fresh Segments?**
