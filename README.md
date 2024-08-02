@@ -498,7 +498,15 @@ SELECT * FROM pizza_recipes_cleaned
 -- Check table pizza_toppings
 -- SELECT * FROM pizza_toppings
 -- DESCIRBE pizza_toppings
-SELECT * FROM pizza_recipes
+DROP TABLE IF EXISTS pizza_recipes_name; 
+CREATE TEMPORARY TABLE pizza_recipes_name(
+SELECT pizza_id, 
+	   GROUP_CONCAT(topping_name ORDER BY pizza_id ASC SEPARATOR ', ') AS topping_name
+FROM pizza_recipes_cleaned r
+JOIN pizza_toppings t  ON r.topping = t.topping_id
+GROUP BY pizza_id
+)
+SELECT * FROM pizza_recipes_name
 ```
 
 #customer_order_cleaned
@@ -571,6 +579,14 @@ SELECT * FROM pizza_recipes
 |          8 |           2 | 2020-01-10 00:15:02 |          23.4 |              15 | nan                     |
 |          9 |           2 | nan                 |         nan   |             nan | Customer Cancellation   |
 |         10 |           1 | 2020-01-11 18:50:20 |          10   |              10 | nan                     |
+
+#pizza_recipes_name
+
+|   pizza_id | topping_name                                                                                                   |
+|-----------:|:---------------------------------------------------------------------------------------------------------------|
+|          1 | Salami, Pepperoni, Mushrooms, Chicken, Cheese, Beef, BBQ Sauce, Bacon                                          |
+|          2 | Tomato Sauce, Tomatoes, Peppers, Onions, Mushrooms, Cheese                                                     |
+|          3 | Tomato Sauce, Tomatoes, Salami, Peppers, Pepperoni, Onions, Mushrooms, Chicken, Cheese, Beef, BBQ Sauce, Bacon |
 
 ### A. Pizza Metrics
 
@@ -1032,23 +1048,61 @@ Result:
 **Q5: Generate an alphabetically ordered comma separated ingredient list for each pizza order from the customer_orders table and add a 2x in front of any relevant ingredients
 For example: "Meat Lovers: 2xBacon, Beef, ... , Salami"**
 ```sql
-WITH temp AS
-(SELECT c.order_id, pizza_name, exclusions,
-(CASE
-WHEN extras IS NOT NULL THEN concat(toppings,', ',ifnull(extras,''))
-ELSE toppings
-end) AS topping_extra
+WITH item_order AS
+(SELECT c.order_id, pizza_name,
+(CASE WHEN extras IS NOT NULL THEN split_str(extras,',',1)
+ELSE ''
+end ) AS extra_1,
+(CASE WHEN extras IS NOT NULL THEN split_str(extras,',',2)
+ELSE ''
+end) AS extra_2,
+rn.topping_name AS ingredients
 FROM customer_orders_pre c
+JOIN runner_orders_cleaned r1 ON c.order_id = r1.order_id
 JOIN pizza_names p1 ON c.pizza_id = p1.pizza_id
-JOIN pizza_recipes p2 ON c.pizza_id = p2.pizza_id
-ORDER BY order_id, toppings
+LEFT JOIN pizza_recipes_name rn ON c.pizza_id =  rn.pizza_id
+WHERE cancellation IS NULL
 )
-SELECT order_id, pizza_name, exclusions,json_search(json_array(topping_extra),'one',exclusions)
-FROM temp
+,item_name AS(
+SELECT i.order_id, 
+       pizza_name,
+       ingredients,
+	   t1.topping_name AS extra_name_1, 
+       t2.topping_name AS extra_name_2
+FROM item_order i
+LEFT JOIN pizza_toppings t1 ON i.extra_1 = t1.topping_id
+LEFT JOIN pizza_toppings t2 ON i.extra_2 = t2.topping_id
+
+)
+SELECT order_id,
+       CONCAT(pizza_name, ' : ' ,
+			  CASE 
+                   WHEN LOCATE(extra_name_1, ingredients) > 0 AND 
+                        LOCATE(extra_name_2, ingredients) > 0 
+                   THEN REPLACE(REPLACE(ingredients, extra_name_2, CONCAT('2x',extra_name_2)), extra_name_1, CONCAT('2x',extra_name_1))
+			  ELSE ingredients
+			  END) AS ingredients_list
+FROM item_name
+ORDER BY order_id
+
 ```
 
 Result:
 
+|   order_id | ingredients_list                                                                       |
+|-----------:|:---------------------------------------------------------------------------------------|
+|          1 | Meatlovers : Salami, Pepperoni, Mushrooms, Chicken, Cheese, Beef, BBQ Sauce, Bacon     |
+|          2 | Meatlovers : Salami, Pepperoni, Mushrooms, Chicken, Cheese, Beef, BBQ Sauce, Bacon     |
+|          3 | Meatlovers : Salami, Pepperoni, Mushrooms, Chicken, Cheese, Beef, BBQ Sauce, Bacon     |
+|          3 | Vegetarian : Tomato Sauce, Tomatoes, Peppers, Onions, Mushrooms, Cheese                |
+|          4 | Meatlovers : Salami, Pepperoni, Mushrooms, Chicken, Cheese, Beef, BBQ Sauce, Bacon     |
+|          4 | Meatlovers : Salami, Pepperoni, Mushrooms, Chicken, Cheese, Beef, BBQ Sauce, Bacon     |
+|          4 | Vegetarian : Tomato Sauce, Tomatoes, Peppers, Onions, Mushrooms, Cheese                |
+|          5 | Meatlovers : Salami, Pepperoni, Mushrooms, Chicken, Cheese, Beef, BBQ Sauce, Bacon     |
+|          7 | Vegetarian : Tomato Sauce, Tomatoes, Peppers, Onions, Mushrooms, Cheese                |
+|          8 | Meatlovers : Salami, Pepperoni, Mushrooms, Chicken, Cheese, Beef, BBQ Sauce, Bacon     |
+|         10 | Meatlovers : Salami, Pepperoni, Mushrooms, Chicken, 2xCheese, Beef, BBQ Sauce, 2xBacon |
+|         10 | Meatlovers : Salami, Pepperoni, Mushrooms, Chicken, Cheese, Beef, BBQ Sauce, Bacon     |
 
 **Q6: What is the total quantity of each ingredient used in all delivered pizzas sorted by most frequent first?**
 ```sql
@@ -1102,26 +1156,107 @@ Result:
 
 ### D. Pricing and Ratings
 
-**If a Meat Lovers pizza costs $12 and Vegetarian costs $10 and there were no charges for changes - how much money has Pizza Runner made so far if there are no delivery fees?**
+**Q1: If a Meat Lovers pizza costs $12 and Vegetarian costs $10 and there were no charges for changes - how much money has Pizza Runner made so far if there are no delivery fees?**
 ```sql
+WITH temp AS 
+(SELECT pizza_name, COUNT(c.pizza_id) as 'number_of_pizza',
+(CASE WHEN pizza_name = 'Meatlovers' THEN 12
+WHEN pizza_name = 'Vegetarian' THEN 10
+ELSE NULL 
+END) as price 
+from customer_orders_pre c
+JOIN runner_orders_cleaned r1 ON c.order_id =r1.order_id
+JOIN pizza_names p1 ON  c.pizza_id = p1.pizza_id
+WHERE cancellation is null
+GROUP BY pizza_name
+)
+SELECT  CONCAT(SUM(number_of_pizza*price),'$') as total_sale
+FROM temp
 ```
 
 Result:
 
-**What if there was an additional $1 charge for any pizza extras?
+| total_sale   |
+|:-------------|
+| 138$         |
+
+**Q2: What if there was an additional $1 charge for any pizza extras?
 Add cheese is $1 extra**
+
 ```sql
+DROP TABLE IF EXISTS pizza_price;
+CREATE TEMPORARY TABLE pizza_price AS 
+(SELECT 
+SUM(CASE WHEN pizza_name = 'Meatlovers' THEN 12
+WHEN pizza_name = 'Vegetarian' THEN 10
+ELSE ''
+END) as total
+FROM customer_orders_pre c
+JOIN runner_orders_cleaned r1 ON c.order_id =r1.order_id
+JOIN pizza_names p1 ON c.pizza_id = p1.pizza_id
+WHERE cancellation is null 
+)
+
+DROP TABLE IF EXISTS pizza_extra;
+CREATE TEMPORARY TABLE pizza_extra AS 
+(SELECT COUNT(extra) total
+FROM customer_orders_pre c
+JOIN runner_orders_cleaned r1 ON c.order_id =r1.order_id
+JOIN JSON_TABLE(TRIM(REPLACE(JSON_ARRAY(c.extras),',','","')),'$[*]' columns(extra varchar(5) path '$')) j
+WHERE cancellation is null 
+)
+
+WITH temp AS 
+(SELECT total 
+FROM pizza_price
+UNION 
+SELECT total 
+FROm pizza_extra)
+SELECT SUM(total) as total_sales
+FROM temp
 ```
 
 Result:
 
-**The Pizza Runner team now wants to add an additional ratings system that allows customers to rate their runner, how would you design an additional table for this new dataset - generate a schema for this new table and insert your own data for ratings for each successful customer order between 1 to 5.**
+|   total_sales |
+|--------------:|
+|           142 |
+
+**Q3: The Pizza Runner team now wants to add an additional ratings system that allows customers to rate their runner, how would you design an additional table for this new dataset - generate a schema for this new table and insert your own data for ratings for each successful customer order between 1 to 5.**
 ```sql
+DROP TABLE IF EXISTS ratings;
+CREATE TABLE ratings (
+  order_id INT,
+  rating INT);
+INSERT INTO ratings (order_id, rating)
+VALUES 
+  (1,3),
+  (2,5),
+  (3,3),
+  (4,1),
+  (5,5),
+  (7,3),
+  (8,4),
+  (10,3);
+  
+ SELECT *
+ FROM ratings;
 ```
 
 Result:
 
-**Using your newly generated table - can you join all of the information together to form a table which has the following information for successful deliveries?
+|   order_id |   rating |
+|-----------:|---------:|
+|          1 |        3 |
+|          2 |        5 |
+|          3 |        3 |
+|          4 |        1 |
+|          5 |        5 |
+|          7 |        3 |
+|          8 |        4 |
+|         10 |        3 |
+
+**Q4: Using your newly generated table - can you join all of the information together to form a table which has the following information for successful deliveries?
 customer_id
 order_id
 runner_id
@@ -1133,23 +1268,75 @@ Delivery duration
 Average speed
 Total number of pizzas**
 ```sql
+SELECT c.customer_id,
+       c.order_id,
+       runner_id,
+       rating,
+       order_time,
+       pickup_time,
+       TIMESTAMPDIFF(MINUTE, order_time, pickup_time) as time_between,
+       duration_mins,
+       AVG(distance_km/duration_mins) avg_speed,
+       COUNT(*) AS pizza_count
+FROM customer_orders c
+LEFT JOIN runner_orders_cleaned r ON c.order_id = r.order_id
+LEFT JOIN ratings rt ON c.order_id = rt.order_id
+WHERE cancellation is null
+GROUP BY c.customer_id,
+       c.order_id,
+       runner_id,
+       rating,
+       order_time,
+       pickup_time,
+       time_between,
+       duration_mins
+
 ```
 
 Result:
 
-**If a Meat Lovers pizza was $12 and Vegetarian $10 fixed prices with no cost for extras and each runner is paid $0.30 per kilometre traveled - how much money does Pizza Runner have left over after these deliveries?**
+|   customer_id |   order_id |   runner_id |   rating | order_time          | pickup_time         |   time_between |   duration_mins |   avg_speed |   pizza_count |
+|--------------:|-----------:|------------:|---------:|:--------------------|:--------------------|---------------:|----------------:|------------:|--------------:|
+|           101 |          1 |           1 |        3 | 2020-01-01 18:05:02 | 2020-01-01 18:15:34 |             10 |              32 |     0.625   |             1 |
+|           101 |          2 |           1 |        5 | 2020-01-01 19:00:52 | 2020-01-01 19:10:54 |             10 |              27 |     0.74074 |             1 |
+|           102 |          3 |           1 |        3 | 2020-01-02 23:51:23 | 2020-01-03 00:12:37 |             21 |              20 |     0.67    |             2 |
+|           103 |          4 |           2 |        1 | 2020-01-04 13:23:46 | 2020-01-04 13:53:03 |             29 |              40 |     0.585   |             3 |
+|           104 |          5 |           3 |        5 | 2020-01-08 21:00:29 | 2020-01-08 21:10:57 |             10 |              15 |     0.66667 |             1 |
+|           105 |          7 |           2 |        3 | 2020-01-08 21:20:29 | 2020-01-08 21:30:45 |             10 |              25 |     1       |             1 |
+|           102 |          8 |           2 |        4 | 2020-01-09 23:54:33 | 2020-01-10 00:15:02 |             20 |              15 |     1.56    |             1 |
+|           104 |         10 |           1 |        3 | 2020-01-11 18:34:49 | 2020-01-11 18:50:20 |             15 |              10 |     1       |             2 |
+
+**Q5: If a Meat Lovers pizza was $12 and Vegetarian $10 fixed prices with no cost for extras and each runner is paid $0.30 per kilometre traveled - how much money does Pizza Runner have left over after these deliveries?**
 ```sql
+SELECT (SUM(CASE WHEN pizza_name = 'Meatlovers' THEN 12
+			     WHEN pizza_name = 'Vegetarian' THEN 10
+		         ELSE 0
+		    END) - SUM(0.3*distance_km) ) AS profit
+ FROM customer_orders c
+ LEFT JOIN runner_orders_cleaned r ON c.order_id = r.order_id
+ LEFT JOIN pizza_names p ON c.pizza_id = p.pizza_id
+ WHERE cancellation IS NULL
 ```
 
 Result:
+
+|   profit |
+|---------:|
+|    73.38 |
 
 ### E. Bonus Questions
 **If Danny wants to expand his range of pizzas - how would this impact the existing data design? Write an INSERT statement to demonstrate what would happen if a new Supreme pizza with all the toppings was added to the Pizza Runner menu?**
 
 ```sql
-```
+INSERT INTO pizza_names (pizza_id, pizza_name)
+VALUES (3, 'Supreme');
 
-Result:
+ALTER TABLE pizza_recipes
+MODIFY COLUMN toppings VARCHAR(50);
+
+INSERT INTO pizza_recipes (pizza_id, toppings)
+VALUES (3, '1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12');
+```
 
 ## Case Study #3: Foodie-Fi
 ## Case Study #4: Data Bank
