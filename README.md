@@ -897,6 +897,35 @@ JOIN pizza_toppings p2 ON p1.topping = p2.topping_id
 
 Result:
 
+|   pizza_id | topping_name   |
+|-----------:|:---------------|
+|          1 | Bacon          |
+|          1 | BBQ Sauce      |
+|          1 | Beef           |
+|          1 | Cheese         |
+|          1 | Chicken        |
+|          1 | Mushrooms      |
+|          1 | Pepperoni      |
+|          1 | Salami         |
+|          2 | Cheese         |
+|          2 | Mushrooms      |
+|          2 | Onions         |
+|          2 | Peppers        |
+|          2 | Tomatoes       |
+|          2 | Tomato Sauce   |
+|          3 | Bacon          |
+|          3 | BBQ Sauce      |
+|          3 | Beef           |
+|          3 | Cheese         |
+|          3 | Chicken        |
+|          3 | Mushrooms      |
+|          3 | Onions         |
+|          3 | Pepperoni      |
+|          3 | Peppers        |
+|          3 | Salami         |
+|          3 | Tomatoes       |
+|          3 | Tomato Sauce   |
+
 **Q2: What was the most commonly added extra?**
 ```sql
 SELECT trim(j.extra) AS extra,topping_name, count(extra) AS 'number of the most added extra'
@@ -911,6 +940,10 @@ ORDER BY count(extra) DESC LIMIT 1
 
 Result:
 
+|   extra | topping_name   |   number of the most added extra |
+|--------:|:---------------|---------------------------------:|
+|       1 | Bacon          |                                3 |
+
 **Q3: What was the most common exclusion?**
 ```sql
 SELECT trim(j.exclusion) AS exclusion,topping_name, count(exclusion) AS 'number of the most added exclusion'
@@ -924,6 +957,10 @@ ORDER BY count(exclusion) DESC LIMIT 1
 ```
 
 Result:
+
+|   exclusion | topping_name   |   number of the most added exclusion |
+|------------:|:---------------|-------------------------------------:|
+|           4 | Cheese         |                                    3 |
 
 **Q4: Generate an order item for each record in the customers_orders table in the format of one of the following:
 Meat Lovers
@@ -977,6 +1014,20 @@ ORDER BY order_id
 ```
 
 Result:
+|   order_id | Item name of order                                            |
+|-----------:|:--------------------------------------------------------------|
+|          1 | Meatlovers                                                    |
+|          2 | Meatlovers                                                    |
+|          3 | Meatlovers                                                    |
+|          3 | Vegetarian                                                    |
+|          4 | Meatlovers - Exclude Cheese                                   |
+|          4 | Meatlovers - Exclude Cheese                                   |
+|          4 | Vegetarian - Exclude Cheese                                   |
+|          5 | Meatlovers - Extra Bacon                                      |
+|          7 | Vegetarian - Extra Bacon                                      |
+|          8 | Meatlovers                                                    |
+|         10 | Meatlovers - Extra Bacon,Cheese - Exclude BBQ Sauce,Mushrooms |
+|         10 | Meatlovers                                                    |
 
 **Q5: Generate an alphabetically ordered comma separated ingredient list for each pizza order from the customer_orders table and add a 2x in front of any relevant ingredients
 For example: "Meat Lovers: 2xBacon, Beef, ... , Salami"**
@@ -997,6 +1048,7 @@ FROM temp
 ```
 
 Result:
+
 
 **Q6: What is the total quantity of each ingredient used in all delivered pizzas sorted by most frequent first?**
 ```sql
@@ -1032,6 +1084,21 @@ ORDER BY number_topping DESC
 ```
 
 Result:
+|   topping |   number_topping |
+|----------:|-----------------:|
+|         1 |               12 |
+|         6 |               11 |
+|         4 |               10 |
+|         3 |                9 |
+|         5 |                9 |
+|         8 |                9 |
+|        10 |                9 |
+|         2 |                8 |
+|         7 |                3 |
+|         9 |                3 |
+|        11 |                3 |
+|        12 |                3 |
+
 
 ### D. Pricing and Ratings
 
