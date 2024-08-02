@@ -1347,7 +1347,19 @@ Danny finds a few smart friends to launch his new startup Foodie-Fi in 2020 and 
 Danny created Foodie-Fi with a data driven mindset and wanted to ensure all future investment decisions and new features were decided using data. This case study focuses on using subscription style digital data to answer important business questions.
 
 ### A. Customer Journey
+Based off the 8 sample customers provided in the sample from the subscriptions table, write a brief description about each customer’s onboarding journey.
 
+Try to keep it as short as possible - you may also want to run some sort of join to make your explanations a bit easier!
+
+Solution: 
+- Customer 1 started a trial plan on 2020-08-01 and after 7 days of the trial, they subscribed to Plan 1.
+- Customer 2 started a trial plan on 2020-09-20 and after completing the 7-day trial, they subscribed to Plan 3.
+- Customer 11 started a trial plan on 2020-12-15, then subscribed to Plan 1 on 2020-12-22, and subscribed to Plan 2 on 2021-03-29.
+- Customer 15 started a trial plan on 2020-03-17, then subscribed to Plan 2 on 2020-03-24, and canceled the subscription on 2020-04-29.
+- Customer 16 started a trial plan on 2020-05-31, then subscribed to Plan 1 on 2020-06-07, and subscribed to Plan 3 on 2020-10-21.
+- Customer 18 started a trial plan on 2020-07-06 and subscribed to Plan 2 on 2020-07-13.
+- Customer 19 started a trial plan on 2020-06-22 and subscribed to Plan 2 on 2020-06-29, then subscribed to Plan 3 on 2020-08-29.
+- 
 ### B. Data Analysis Questions
 
 **Q1. How many customers has Foodie-Fi ever had?**
@@ -1712,6 +1724,7 @@ Result:
 **Q2. What key metrics would you recommend Foodie-Fi management to track over time to assess performance of their overall business?**
 Solution:
 Key metrics: revenue growth by monthly, churn rate, customer growth
+
 **Q3. What are some key customer journeys or experiences that you would analyse further to improve customer retention?**
 Solution:
 - Customers who downgraded their plan
@@ -1720,6 +1733,7 @@ Solution:
 
 **Q4. If the Foodie-Fi team were to create an exit survey shown to customers who wish to cancel their subscription, what questions would you include in the survey?**
 Solution:
+
 **Q5. What business levers could the Foodie-Fi team use to reduce the customer churn rate? How would you validate the effectiveness of your ideas?**
 Solution:
 
