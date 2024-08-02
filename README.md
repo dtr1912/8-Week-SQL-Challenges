@@ -1388,7 +1388,7 @@ Solution:
 - Customer 16 started a trial plan on 2020-05-31, then subscribed to Plan 1 on 2020-06-07, and subscribed to Plan 3 on 2020-10-21.
 - Customer 18 started a trial plan on 2020-07-06 and subscribed to Plan 2 on 2020-07-13.
 - Customer 19 started a trial plan on 2020-06-22 and subscribed to Plan 2 on 2020-06-29, then subscribed to Plan 3 on 2020-08-29.
-- 
+
 ### B. Data Analysis Questions
 
 **Q1. How many customers has Foodie-Fi ever had?**
