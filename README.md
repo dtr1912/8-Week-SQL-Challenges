@@ -19,7 +19,7 @@ Please find the solution links for the case studies below. Simply click on the l
   - [D. Outside The Box Questions](#d-outside-the-box-questions)
 - [Case Study #4: Data Bank](#case-study-4-data-bank)
   - [A. Customer Nodes Exploration](#a-customer-nodes-exploration)
-  - [B. Customer Transactions](#b-customer-transaction)
+  - [B. Customer Transactions](#b-customer-transactions)
   - [C. Data Allocation Challenge](#c-data-allocation-challenge)
   - [D. Extra Challenge](#d-extra-challenge)
   - [E. Extension Request](#e-extension-request)
