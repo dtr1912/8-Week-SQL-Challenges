@@ -1893,12 +1893,175 @@ Result:
 
 ### B. Customer Transactions
 **Q1. What is the unique count and total amount for each transaction type?**
+SELECT txn_type 'Transaction Type',
+	   COUNT(txn_type) 'Number of Unique Type',
+       SUM(txn_amount) 'Total Amount'
+FROM customer_transactions
+GROUP BY txn_type
+
+Result:
+
+| Transaction Type   |   Number of Unique Type |   Total Amount |
+|:-------------------|------------------------:|---------------:|
+| deposit            |                    2671 |        1359168 |
+| withdrawal         |                    1580 |         793003 |
+| purchase           |                    1617 |         806537 |
+
 **Q2. What is the average total historical deposit counts and amounts for all customers?**
+```sql
+WITH deposit AS (
+SELECT customer_id,
+	   COUNT(txn_type) deposit_count,
+       SUM(txn_amount) amount
+FROM customer_transactions
+WHERE txn_type = 'deposit'
+GROUP BY customer_id
+)
+SELECT AVG(deposit_count) avg_deposit_count,
+       AVG(amount) avg_amount
+FROM deposit
+```
+Result:
+|   avg_deposit_count |   avg_amount |
+|--------------------:|-------------:|
+|               5.342 |      2718.34 |
+
 **Q3. For each month - how many Data Bank customers make more than 1 deposit and either 1 purchase or 1 withdrawal in a single month?**
+```sql
+WITH temp AS (
+SELECT  MONTHNAME(txn_date) as  Month_name,
+        customer_id,
+        SUM(CASE WHEN txn_type = 'deposit' THEN 1 ELSE 0 END) deposit_count,
+        SUM(CASE WHEN txn_type = 'withdrawl' THEN 1 ELSE 0 END) withdrawl_count,
+        SUM(CASE WHEN txn_type = 'purchase' THEN 1 ELSE 0 END) purchase_count
+FROM customer_transactions
+GROUP BY MONTHNAME(txn_date), customer_id
+)
+SELECT month_name, 
+	   COUNT(customer_id)  customer_count
+FROM temp 
+WHERE deposit_count > 1 AND  (withdrawl_count >= 1 OR purchase_count >= 1)
+GROUP BY month_name
+```
+Result:
+| month_name   |   customer_count |
+|:-------------|-----------------:|
+| January      |              128 |
+| March        |              146 |
+| April        |               55 |
+| February     |              135 |
+
 **Q4. What is the closing balance for each customer at the end of the month?**
+```sql 
+-- End date in the month of the max date of our dataset
+WITH RECURSIVE recursive_dates AS (
+  SELECT
+    DISTINCT customer_id,
+    CAST("2020-01-31" AS DATE) AS end_date
+  FROM customer_transactions
+  UNION ALL
+  SELECT 
+    customer_id,
+    LAST_DAY(DATE_ADD(end_date, INTERVAL 1 MONTH)) AS end_date
+  FROM recursive_dates
+  WHERE LAST_DAY(DATE_ADD(end_date, INTERVAL 1 MONTH)) <= (SELECT LAST_DAY(MAX(txn_date)) FROM customer_transactions)
+), 
+monthly_transactions AS (
+  SELECT
+    customer_id,
+    LAST_DAY(txn_date) AS end_date,
+    SUM(CASE WHEN txn_type IN ('withdrawal', 'purchase') THEN -txn_amount
+             ELSE txn_amount 
+	    END) AS transactions
+  FROM customer_transactions
+  GROUP BY customer_id, LAST_DAY(txn_date)
+)				
+SELECT 
+  r.customer_id,
+  r.end_date,
+  COALESCE(m.transactions, 0) AS transactions,
+  SUM(m.transactions) OVER (PARTITION BY r.customer_id ORDER BY r.end_date ROWS UNBOUNDED PRECEDING) AS closing_balance
+FROM recursive_dates r
+LEFT JOIN  monthly_transactions m ON r.customer_id = m.customer_id AND r.end_date = m.end_date;
+```
+Result: (Limit 17 rows)
+|   customer_id | end_date   |   transactions |   closing_balance |
+|--------------:|:-----------|---------------:|------------------:|
+|             1 | 2020-01-31 |            312 |               312 |
+|             1 | 2020-02-29 |              0 |               312 |
+|             1 | 2020-03-31 |           -952 |              -640 |
+|             1 | 2020-04-30 |              0 |              -640 |
+|             2 | 2020-01-31 |            549 |               549 |
+|             2 | 2020-02-29 |              0 |               549 |
+|             2 | 2020-03-31 |             61 |               610 |
+|             2 | 2020-04-30 |              0 |               610 |
+|             3 | 2020-01-31 |            144 |               144 |
+|             3 | 2020-02-29 |           -965 |              -821 |
+|             3 | 2020-03-31 |           -401 |             -1222 |
+|             3 | 2020-04-30 |            493 |              -729 |
+|             4 | 2020-01-31 |            848 |               848 |
+|             4 | 2020-02-29 |              0 |               848 |
+|             4 | 2020-03-31 |           -193 |               655 |
+|             4 | 2020-04-30 |              0 |               655 |
+|             5 | 2020-01-31 |            954 |               954 |
+
 **Q5. What is the percentage of customers who increase their closing balance by more than 5%?**
+```sql
+-- 75.8% of customers increasing their closing balance by more than 5% compared to the previous month.
+WITH RECURSIVE recursive_dates AS (
+  SELECT
+    DISTINCT customer_id,
+    CAST("2020-01-31" AS DATE) AS end_date
+  FROM customer_transactions
+  UNION ALL
+  SELECT 
+    customer_id,
+    LAST_DAY(DATE_ADD(end_date, INTERVAL 1 MONTH)) AS end_date
+  FROM recursive_dates
+  WHERE LAST_DAY(DATE_ADD(end_date, INTERVAL 1 MONTH)) <= (SELECT LAST_DAY(MAX(txn_date)) FROM customer_transactions)
+), 
+monthly_transactions AS (
+  SELECT
+    customer_id,
+    LAST_DAY(txn_date) AS end_date,
+    SUM(CASE WHEN txn_type IN ('withdrawal', 'purchase') THEN -txn_amount
+             ELSE txn_amount 
+	    END) AS transactions
+  FROM customer_transactions
+  GROUP BY customer_id, LAST_DAY(txn_date)
+),
+customers_balance AS (
+SELECT 
+  r.customer_id,
+  r.end_date,
+  COALESCE(m.transactions, 0) AS transactions,
+  SUM(m.transactions) OVER (PARTITION BY r.customer_id ORDER BY r.end_date ROWS UNBOUNDED PRECEDING) AS closing_balance
+FROM recursive_dates r
+LEFT JOIN  monthly_transactions m ON r.customer_id = m.customer_id AND r.end_date = m.end_date
+),
+customers_next_balance AS (
+  SELECT *,
+    LEAD(closing_balance) OVER(PARTITION BY customer_id ORDER BY end_date) AS next_balance
+  FROM customers_balance
+),
+pct_increase AS (
+  SELECT *,
+    100.0*(next_balance-closing_balance)/closing_balance AS pct
+  FROM customers_next_balance
+  WHERE closing_balance != 0 AND next_balance IS NOT NULL
+)
+SELECT (100.0*COUNT(DISTINCT customer_id)) / (SELECT COUNT(DISTINCT customer_id) FROM customer_transactions) AS pct_customers
+FROM pct_increase
+WHERE pct > 5;
+```
+Result:
+
+|   pct_customers |
+|----------------:|
+|            75.8 |
+
 ### C. Data Allocation Challenge
- To test out a few different hypotheses - the Data Bank team wants to run an experiment where different groups of customers would be allocated data using 3 different options:
+To test out a few different hypotheses - the Data Bank team wants to run an experiment where different groups of customers would be allocated data using 3 different options:
  
 - Option 1: data is allocated based off the amount of money at the end of the previous month
 - Option 2: data is allocated on the average amount of money kept in the account in the previous 30 days
